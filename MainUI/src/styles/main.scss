@@ -1,0 +1,60 @@
+@import '~vuetify/src/styles/main.sass';
+@import '~vuetify/src/styles/styles.sass';
+
+th {
+    @extend .font-weight-black;
+    @extend .black--text;
+    @extend .subtitle-1;
+}
+
+td {
+    @extend .font-weight-black;
+    @extend .black--text;
+    @extend .text-left;
+}
+
+.v-toolbar__title {
+    @extend .font-weight-black;
+    @extend .black--text;
+}
+
+.v-data-footer {
+    @extend .font-weight-black;
+    @extend .black--text;
+}
+
+.bottomLeftButton {
+    bottom: 120px;
+    left: 120px;
+    position: fixed;
+    border-radius: 50%;
+    display: block;
+    background-color: black;
+    color: white;
+}
+
+.bottomLeftBanner {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+}
+
+.bottomRightButton {
+    bottom: 120px;
+    right: 120px;
+    position: fixed;
+    border-radius: 50%;
+    display: block;
+    background-color: black;
+    color: white;
+}
+
+.bottomRightBanner {
+    bottom: 0;
+    right: 0;
+    position: fixed;
+}
+
+.inverseElevation {
+    box-shadow: 0 -11px 15px -7px rgba(0,0,0,.2), 0 -24px 38px 3px rgba(0,0,0,.14), 0 -9px 46px 8px rgba(0,0,0,.12) !important
+}

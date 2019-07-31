@@ -1,0 +1,12 @@
+When upload files on server:
+1-Make cron job for banner rotator
+2-By default there must be at least 1 row in PTP and BannerRotator tables (Including their counters)
+
+When setting up server:
+1-Add 2FA for server login
+2-Make restrictions in dbo account
+3-
+
+
+===5/12/2019===
+When updating the server:

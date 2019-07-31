@@ -1,0 +1,49 @@
+@page
+@model AdminPanel.Pages.Faucet4u.IndexModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col text-center">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <p class="font-weight-bold">So whats new ? Following information shows new stuff that has happened while you were off</p>
+
+        <button type="button" class="btn btn-primary mx-auto">
+            Support Tickets <span class="badge badge-danger ml-2" id="supportTickets"></span>
+        </button>
+        <button type="button" class="btn btn-primary mx-auto">
+            Support Tickets Reply<span class="badge badge-danger ml-2" id="supportTicketsReply"></span>
+        </button>
+        <br />
+
+        <!--
+            <button type="button" class="btn btn-secondary mx-auto">
+                Orders <span class="badge badge-danger ml-2" id="orders"></span>
+            </button>
+        -->
+
+        <button type="button" class="btn btn-secondary mx-auto">
+            Withdrawals <span class="badge badge-danger ml-2" id="withdrawal"></span>
+        </button>
+        <script>
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+            document.getElementById("supportTickets").innerHTML = tableData[0][0].Count;
+            document.getElementById("supportTicketsReply").innerHTML = tableData[1][0].Count;
+            //document.getElementById("orders").innerHTML = tableData[2][0].Count;
+            document.getElementById("withdrawal").innerHTML = tableData[3][0].Count;
+
+        </script>
+    </div>
+    <div class="col-3"></div>
+</div>

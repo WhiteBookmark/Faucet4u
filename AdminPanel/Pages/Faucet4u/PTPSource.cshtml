@@ -1,0 +1,73 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.PTPSourceModel
+@using Newtonsoft.Json.Linq
+@{
+    ViewData["Title"] = "PTPSource";
+    Layout = "Faucet4u_Layout";
+    //JArray tableData = JArray.Parse(@ViewData["TableData"].ToString());
+
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-1"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col text-center">
+                <p class="bg-danger text-white">Absolute source is disabled for the time being due to it taking heavy load on server and not providing enough benefits.</p>
+                <button class="btn btn-unique waves-effect m-0" type="button" disabled onclick="source(0)">Absolute Source</button>
+                <button class="btn btn-unique waves-effect m-0" type="button" disabled onclick="source(1)">Unified Source</button>
+            </div>
+            <div class="col-3"></div>
+        </div>
+        <br />
+
+        <table id="dtBasicExample" class="table table-striped table-hover table-bordered" cellspacing="0" width="100%"></table>
+
+        <script>
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            var datatable;
+
+            $(document).ready(function () {
+                datatable = $('#dtBasicExample').DataTable({
+                    "data": [],
+                    "columns": [
+                        { "title": "Username" },
+                        { "title": "Site" },
+                        { "title": "Counter" }
+                    ]
+                });
+                source(1);
+            });
+
+            function source(type) {
+
+                datatable.clear().draw();
+                for (i = 0; i < Object.keys(tableData[type]).length; i++) {
+
+                    datatable.row.add([
+                        tableData[type][i].Username,
+                        tableData[type][i].site,
+                        tableData[type][i].counter
+                    ]).draw();
+
+                }
+            }
+
+
+        </script>
+
+
+    </div>
+    <div class="col-1"></div>
+</div>
+

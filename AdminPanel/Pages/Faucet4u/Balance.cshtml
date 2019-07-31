@@ -1,0 +1,184 @@
+@page
+@model AdminPanel.Pages.Faucet4u.BalanceModel
+@{
+    ViewData["Title"] = "Balance";
+    Layout = "Faucet4u_Layout";
+}
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+        <!--Main balance -- Add -->
+        <form asp-page-handler="AddMainBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Add</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Main Balance</span>
+                </div>
+            </div>
+
+        </form>
+        <!--Main balance -- Retract -->
+        <form asp-page-handler="RetractMainBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Retract</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Main Balance</span>
+                </div>
+            </div>
+
+        </form>
+        <!--Main balance -- Replace -->
+        <form asp-page-handler="ReplaceMainBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Replace</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Main Balance</span>
+                </div>
+            </div>
+
+        </form>
+
+        <!--Purchase balance -- Add -->
+        <form asp-page-handler="AddPurchaseBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Add</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Purchase Balance</span>
+                </div>
+            </div>
+
+        </form>
+        <!--Purchase balance -- Retract -->
+        <form asp-page-handler="RetractPurchaseBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Retract</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Purchase Balance</span>
+                </div>
+            </div>
+
+        </form>
+        <!--Purchase balance -- Replace -->
+        <form asp-page-handler="ReplacePurchaseBalance" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Replace</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@@</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="amount" aria-label="amount" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Purchase Balance</span>
+                </div>
+            </div>
+
+        </form>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Balance
+                    </th>
+                    <th class="th-sm">
+                        Purchase Balance
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Balance
+                    </th>
+                    <th>
+                        Purchase Balance
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td class="clickableTableData" onClick="updateUsernameInput(this.innerHTML)">' + tableData[i].Username +
+                    '</td><td class="clickableTableData" onClick="updateAmountInput(this.innerHTML)">' + tableData[i].Balance.toFixed(8) +
+                    '</td><td class="clickableTableData" onClick="updateAmountInput(this.innerHTML)">' + tableData[i].PurchaseBalance.toFixed(8) +
+                    '</td></tr>');
+
+            }
+
+            function updateUsernameInput(username) {
+
+                $('input[name=username]').val(username);
+                window.scrollTo(0, 0);
+            }
+
+            function updateAmountInput(amount) {
+
+                $('input[name=amount]').val(amount);
+                window.scrollTo(0, 0);
+            }
+        </script>
+
+    </div>
+    <div class="col-3"></div>
+</div>

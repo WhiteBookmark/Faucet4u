@@ -1,0 +1,130 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.ReferralsModel
+@{
+    ViewData["Title"] = "Referrals";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-0"></div>
+    <div class="col text-center">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col text-center">
+                <!-- Referrals-- View-->
+                <form asp-page-handler="OnGet" method="get">
+                    <div class="md-form input-group">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-unique waves-effect m-0" type="submit">View Data</button>
+                        </div>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Username</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+                </form>
+
+                <button class="btn btn-unique waves-effect m-0" type="button" onclick="referralLevelData(0)">Level 1 Referrals</button>
+                <button class="btn btn-unique waves-effect m-0" type="button" onclick="referralLevelData(1)">Level 2 Referrals</button>
+                <button class="btn btn-unique waves-effect m-0" type="button" onclick="referralLevelData(2)">Level 3 Referrals</button>
+            </div>
+            <div class="col-3"></div>
+        </div>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered ordering searching paging scrollX" cellspacing="0"></table>
+
+        <script>
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            var datatable;
+
+            $(document).ready(function () {
+                datatable = $('#dtBasicExample').DataTable({
+                    "data": [],
+                    "columns": [
+                        { "title": "Username" },
+                        { "title": "Email" },
+                        { "title": "Email Confirmed" },
+                        { "title": "Date Registered" },
+                        { "title": "Registration IP" },
+                        { "title": "Country" },
+                        { "title": "FaucetHub Bitcoin Address" },
+                        { "title": "Account Locked" },
+                        { "title": "Cheat Counter" },
+                        { "title": "Referrer" },
+                        { "title": "Balance" },
+                        { "title": "Offerwall Balance" },
+                        { "title": "Purchase Balance" },
+                        { "title": "Total Withdrawn" },
+                        { "title": "Total Offerwall Withdrawn" },
+                        { "title": "Link Shortner Earning" },
+                        { "title": "Bonus Ad Earning" },
+                        { "title": "Offerwall Earning" },
+                        { "title": "PTP Unique Earning" },
+                        { "title": "PTP Non-Unique 1 Earning" },
+                        { "title": "PTP Non-Unique 2 Earning" },
+                        { "title": "PTP Non-Unique 3 Earning" },
+                        { "title": "Last Login" },
+                        { "title": "Last Faucet Claim" }
+                    ]
+                });
+                $('.dataTables_length').addClass('bs-select');
+                referralLevelData(0);
+            });
+
+            function referralLevelData(level) {
+
+                datatable.clear().draw();
+
+                for (i = 0; i < Object.keys(tableData[level]).length; i++) {
+
+                    datatable.row.add([
+
+                        tableData[level][i].Username,
+                        tableData[level][i].Email,
+                        tableData[level][i].IsConfirmed,
+                        moment(tableData[level][i].DateRegistered).format('YYYY-MM-DD - hh:mm:ss A'),
+                        tableData[level][i].IP,
+                        tableData[level][i].Country,
+                        tableData[level][i].FaucetHubBitcoinAddress,
+                        tableData[level][i].Locked,
+                        tableData[level][i].CheatCounter,
+                        tableData[level][i].Referrer,
+                        tableData[level][i].Balance.toFixed(8),
+                        tableData[level][i].OfferwallBalance.toFixed(8),
+                        tableData[level][i].PurchaseBalance.toFixed(8),
+                        tableData[level][i].TotalWithdrawn.toFixed(8),
+                        tableData[level][i].TotalOfferwallWithdrawn.toFixed(8),
+                        tableData[level][i].LinkShortnerEarning.toFixed(8),
+                        tableData[level][i].BonusAdEarning.toFixed(8),
+                        tableData[level][i].OfferwallEarning.toFixed(8),
+                        tableData[level][i].PTPUniqueEarning.toFixed(8),
+                        tableData[level][i].PTPNonUnique1Earning.toFixed(8),
+                        tableData[level][i].PTPNonUnique2Earning.toFixed(8),
+                        tableData[level][i].PTPNonUnique3Earning.toFixed(8),
+                        moment(tableData[level][i].LastLogin).format('YYYY-MM-DD - hh:mm:ss A'),
+                        moment(tableData[level][i].LastClaim).format('YYYY-MM-DD - hh:mm:ss A')
+
+                    ]).draw();
+
+                }
+            }
+
+        </script>
+
+
+    </div>
+    <div class="col-0"></div>
+</div>
+
+
+

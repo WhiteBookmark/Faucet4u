@@ -1,0 +1,129 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.DepositMethodModel
+@{
+    ViewData["Title"] = "DepositMethod";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <p class="bg-danger text-white">
+            Please note: Do not add bitcoin address wallet without asking the developer, due to some complex calculations, adding just the address of wallet will result in error.
+            Consult to the developer for adding any bitcoin wallet address.
+        </p>
+
+        <!--Deposit Method -- Add -->
+        <form asp-page-handler="AddDepositMethod" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Add</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Method Name</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Method name" name="name" aria-label="Name" aria-describedby="basic-addon1">
+                <input type="text" class="form-control" placeholder="Address" name="address" aria-label="Address" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Address</span>
+                </div>
+            </div>
+        </form>
+
+        <!--Deposit Method -- Modify -->
+        <form asp-page-handler="ModifyDepositMethod" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Modify</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Method Name</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Method name" name="name" aria-label="Name" aria-describedby="basic-addon1">
+                <input type="text" class="form-control" placeholder="Address" name="address" aria-label="Address" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Address</span>
+                </div>
+            </div>
+        </form>
+
+        <!--Deposit Method -- Delete -->
+        <form asp-page-handler="DeleteDepositMethod" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Delete</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Method Name</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Method name" name="name" aria-label="Name" aria-describedby="basic-addon1">
+            </div>
+        </form>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Deposit Method Name
+                    </th>
+                    <th class="th-sm">
+                        Address
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Deposit Method Name
+                    </th>
+                    <th>
+                        Address
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td class="clickableTableData" onClick="updatNameInput(this.innerHTML)">' + tableData[0][i].Name +
+                    '</td><td class="clickableTableData" onClick="updateAddressInput(this.innerHTML)">' + tableData[0][i].Address +
+                    '</td></tr>');
+            }
+
+            function updateNameInput(name) {
+
+                $('input[name=name]').val(name);
+                window.scrollTo(0, 0);
+            }
+
+            function updateAddressInput(address) {
+
+                $('input[name=address]').val(address);
+                window.scrollTo(0, 0);
+            }
+        </script>
+
+
+    </div>
+    <div class="col-3"></div>
+</div>
+
+

@@ -1,0 +1,117 @@
+@page
+@model AdminPanel.Pages.Faucet4u.SupportTicketsReplyModel
+@{
+    ViewData["Title"] = "SupportTicketsReply";
+    Layout = "Faucet4u_Layout";
+}
+
+<p hidden id="tableData">@ViewData["TableData"]</p>
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+
+        <h4>User message:</h4>
+        <p class="grey lighten-2 text-dark font-weight-bold" id="initialMessage"></p>
+
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+        <!-- Support Ticket Reply-- Reply-->
+        <form asp-page-handler="ReplySupportTicket" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Reply</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Message</span>
+                </div>
+                <textarea type="text" class="form-control" placeholder="Type your message here..." name="reply" aria-label="Reply" aria-describedby="basic-addon1"></textarea>
+                <input hidden type="text" class="form-control" value="@ViewData["supportTicketReference"]" placeholder="Reference" name="reference" aria-label="Reference" aria-describedby="basic-addon1">
+            </div>
+        </form>
+
+        <!--Support Ticket Reply-- Lock-->
+        <form asp-page-handler="LockSupportTicket" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Lock</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Reference</span>
+                </div>
+                <input type="text" class="form-control" value="@ViewData["supportTicketReference"]" placeholder="Reference" name="reference" aria-label="Reference" aria-describedby="basic-addon1">
+            </div>
+        </form>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        DateTime
+                    </th>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Reply
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        DateTime
+                    </th>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Reply
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            document.getElementById("initialMessage").innerHTML = tableData[1][0].Message;
+            $('#initialMessage').html($('#initialMessage').html().replace(/\n/g, "<br />"));
+
+
+            for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td>' + moment(tableData[0][i].DateTime).format('YYYY-MM-DD - hh:mm:ss A') +
+                    '</td><td>' + tableData[0][i].Username +
+                    '</td><td class="clickableTableData" onClick="updateReplyInput(this.innerHTML)">' + tableData[0][i].Reply +
+                    '</td></tr>');
+
+            }
+
+            $('#tableBody').html($('#tableBody').html().replace(/\n/g, "<br />"));
+
+            function updateReplyInput(reply) {
+
+                $('textarea[name=reply]').val(reply.replace(/<br\s*[\/]?>/gi, "\n"));
+                window.scrollTo(0, 0);
+            }
+
+        </script>
+
+
+    </div>
+    <div class="col-3"></div>
+
+
+</div>

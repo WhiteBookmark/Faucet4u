@@ -1,0 +1,93 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.DirectSourceModel
+@{
+    ViewData["Title"] = "DirectSource";
+    Layout = "Faucet4u_Layout";
+}
+
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col text-center">
+                <button class="btn btn-unique waves-effect m-0" type="button" onclick="source(0)">Absolute Source</button>
+                <button class="btn btn-unique waves-effect m-0" type="button" onclick="source(1)">Unified Source</button>
+            </div>
+            <div class="col-3"></div>
+        </div>
+        <br />
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Site
+                    </th>
+                    <th class="th-sm">
+                        Counter
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Site
+                    </th>
+                    <th>
+                        Counter
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            function source(type) {
+
+                var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+                document.getElementById("tableBody").innerHTML = "";
+
+                for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                    document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                        '<tr><td>' + tableData[type][i].Username +
+                        '</td><td>' + tableData[type][i].site +
+                        '</td><td>' + tableData[type][i].counter +
+                        '</td></tr>');
+
+                }
+            }
+
+            source(0);
+
+
+        </script>
+
+
+    </div>
+    <div class="col-3"></div>
+
+
+</div>
+
+

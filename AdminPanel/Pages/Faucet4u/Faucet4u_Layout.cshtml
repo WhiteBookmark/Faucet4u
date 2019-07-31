@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.5/css/mdb.min.css" rel="stylesheet">
+    <!-- MDBootstrap Datatables  -->
+    <link href="~/css/addons/datatables.min.css" rel="stylesheet">
+
+    <!--Following are linked in header because they seem neccessary to fill the condition of some code-->
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--Moment js-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <!--Socket io-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+
+    <style>
+
+        .clickableTableData {
+            cursor: pointer;
+        }
+
+        form {
+            margin-bottom: 2%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pos-f-t">
+        <div class="collapse" id="navbarToggleExternalContent">
+            <div class="bg-dark p-4">
+                <h4 class="text-white">Users</h4>
+                <a href="/Faucet4u/Balance"><span class="mdb-color white-text">Balance</span></a>
+                <a href="/Faucet4u/BonusAdsHistory"><span class="mdb-color white-text">Bonus Ads History</span></a>
+                <a href="/Faucet4u/ChatHistory"><span class="mdb-color white-text">Chat History</span></a>
+                <a href="/Faucet4u/Cheat"><span class="mdb-color white-text">Cheat/Account Lock</span></a>
+                <a href="/Faucet4u/DirectSource"><span class="mdb-color white-text">Direct Source</span></a>
+                <a href="/Faucet4u/LinkShortnersHistory"><span class="mdb-color white-text">Link Shortners History</span></a>
+                <a href="/Faucet4u/LoginHistory"><span class="mdb-color white-text">Login History</span></a>
+                <a href="/Faucet4u/Profile"><span class="mdb-color white-text">Profile</span></a>
+                <a href="/Faucet4u/PTPSource"><span class="mdb-color white-text">PTP Source</span></a>
+                <a href="/Faucet4u/Referrals"><span class="mdb-color white-text">Referrals</span></a>
+                <a href="/Faucet4u/SupportTickets"><span class="mdb-color white-text">Support Tickets</span></a>
+                <a href="/Faucet4u/Users"><span class="mdb-color white-text">Users</span></a>
+            </div>
+            <div class="bg-dark p-4">
+                <h4 class="text-white">Business</h4>
+                <a href="/Faucet4u/Advertise"><span class="mdb-color white-text">Advertise</span></a>
+                <a href="/Faucet4u/BannerRotator"><span class="mdb-color white-text">Banner Rotator</span></a>
+                <a href="/Faucet4u/BonusAds"><span class="mdb-color white-text">Bonus Ads</span></a>
+                <a href="/Faucet4u/Deposit"><span class="mdb-color white-text">Deposits</span></a>
+                <a href="/Faucet4u/DepositMethod"><span class="mdb-color white-text">Deposit Methods</span></a>
+                <a href="/Faucet4u/Direct"><span class="mdb-color white-text">Direct Traffic</span></a>
+                <a href="/Faucet4u/FaucetHub"><span class="mdb-color white-text">FaucetHub</span></a>
+                <a href="/Faucet4u/Settings"><span class="mdb-color white-text">Faucet Settings</span></a>
+                <a href="/Faucet4u/LinkShortners"><span class="mdb-color white-text">Link Shortners</span></a>
+                <a href="/Faucet4u/Mining"><span class="mdb-color white-text">Mining</span></a>
+                <a href="/Faucet4u/Offerwall"><span class="mdb-color white-text">Offerwall</span></a>
+                <a href="/Faucet4u/Orders"><span class="mdb-color white-text">Orders</span></a>
+                <a href="/Faucet4u/PTP"><span class="mdb-color white-text">PTP</span></a>
+                <a href="/Faucet4u/PTPBlacklist"><span class="mdb-color white-text">PTP Blacklist</span></a>
+                <a href="/Faucet4u/Email"><span class="mdb-color white-text">Send Email</span></a>
+                <a href="/Faucet4u/Wallet"><span class="mdb-color white-text">Wallet</span></a>
+                <a href="/Faucet4u/Withdrawal"><span class="mdb-color white-text">Withdrawal</span></a>
+            </div>
+            <div class="bg-dark p-4">
+                <h4 class="text-white">Developer Only Section</h4>
+                <a href="/Faucet4u/BannerNetwork"><span class="mdb-color white-text">Banner Networks</span></a>
+                <a href="/Faucet4u/DeveloperLogs"><span class="mdb-color white-text">Developer Logs</span></a>
+                <a href="/Faucet4u/PTPBannerNetwork"><span class="mdb-color white-text">PTP Banner Networks</span></a>
+            </div>
+        </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent"
+                    aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+    </div>
+    @RenderBody()
+    <hr />
+    <footer>
+        <p>&copy; 2018 - Admin Panel </p>
+        <a href="/Faucet4u">Faucet4all</a>
+    </footer>
+
+
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.5/js/mdb.min.js"></script>
+    <!-- MDBootstrap Datatables  -->
+    <script type="text/javascript" src="~/js/addons/datatables.min.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+@page
+@model AdminPanel.Pages.Faucet4u.DeveloperLogsModel
+@{
+    ViewData["Title"] = "DeveloperLogs";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-1"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Guid
+                    </th>
+                    <th class="th-sm">
+                        DateTime
+                    </th>
+                    <th class="th-sm">
+                        IP
+                    </th>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Type
+                    </th>
+                    <th class="th-sm">
+                        Message
+                    </th>
+                    <th class="th-sm">
+                        Exception
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Guid
+                    </th>
+                    <th>
+                        DateTime
+                    </th>
+                    <th>
+                        IP
+                    </th>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Type
+                    </th>
+                    <th>
+                        Message
+                    </th>
+                    <th>
+                        Exception
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td>' + tableData[i].Guid +
+                    '</td><td>' + moment(tableData[i].DateTime).format('YYYY-MM-DD - hh:mm:ss A') +
+                    '</td><td>' + tableData[i].IP +
+                    '</td><td>' + tableData[i].Username +
+                    '</td><td>' + tableData[i].Type +
+                    '</td><td>' + tableData[i].Message +
+                    '</td><td>' + tableData[i].Exception +
+                    '</td></tr>');
+
+            }
+
+        </script>
+
+    </div>
+    <div class="col-1"></div>
+</div>
+

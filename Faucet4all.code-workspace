@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "CronJobs"
+    },
+    {
+      "path": "FrontEndAssistant"
+    },
+    {
+      "path": "PTP"
+    },
+    {
+      "path": "Sockets"
+    }
+  ],
+  "settings": {}
+}

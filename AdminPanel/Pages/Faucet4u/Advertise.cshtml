@@ -1,0 +1,157 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.AdvertiseModel
+@{
+    ViewData["Title"] = "Advertise";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-1"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <!--Package -- Add -->
+        <form asp-page-handler="AddPackage" method="post" class="border border-dark p-5">
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Name</span>
+                </div>
+                <select class="browser-default custom-select" id="inputGroupSelect02" name="name">
+                    <option value="PTP" selected>PTP</option>
+                    <option value="Banner">Banner</option>
+                </select>
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Is this package time based ?</span>
+                </div>
+                <select class="browser-default custom-select" id="inputGroupSelect01" name="isTimeBased">
+                    <option value="1" selected>Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Credit</span>
+                </div>
+                <input type="number" class="form-control" placeholder="0" step="1" name="credit" aria-label="credit" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Price</span>
+                </div>
+                <input type="number" class="form-control" placeholder="0.00000000" step="0.00000001" name="price" aria-label="price" aria-describedby="basic-addon1">
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="submit">Add</button>
+        </form>
+
+        <!--Package -- Delete -->
+        <form asp-page-handler="DeletePackage" method="post">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Delete</button>
+                </div>
+                <input type="text" class="form-control" placeholder="Reference #" name="reference" aria-label="Reference" aria-describedby="basic-addon1">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Reference</span>
+                </div>
+            </div>
+
+        </form>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Reference
+                    </th>
+                    <th class="th-sm">
+                        Name
+                    </th>
+                    <th class="th-sm">
+                        Is time based ?
+                    </th>
+                    <th class="th-sm">
+                        Credit
+                    </th>
+                    <th class="th-sm">
+                        Price
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Reference
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Is time based ?
+                    </th>
+                    <th>
+                        Credit
+                    </th>
+                    <th>
+                        Price
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td class="clickableTableData" onClick="updateReferenceInput(this.innerHTML)">' + tableData[0][i].Reference +
+                    '</td><td>' + tableData[0][i].Name +
+                    '</td><td>' + tableData[0][i].IsTimeBased +
+                    '</td><td class="clickableTableData" onClick="updateCreditInput(this.innerHTML)">' + tableData[0][i].Credit +
+                    '</td><td class="clickableTableData" onClick="updatePriceInput(this.innerHTML)">' + tableData[0][i].Price.toFixed(8) +
+                    '</td></tr>');
+
+            }
+
+            function updateReferenceInput(reference) {
+
+                $('input[name=reference]').val(reference);
+                window.scrollTo(0, 0);
+            }
+
+            function updateCreditInput(credit) {
+
+                $('input[name=credit]').val(credit);
+                window.scrollTo(0, 0);
+            }
+
+            function updatePriceInput(price) {
+
+                $('input[name=price]').val(price);
+                window.scrollTo(0, 0);
+            }
+        </script>
+
+    </div>
+    <div class="col-1"></div>
+</div>
+

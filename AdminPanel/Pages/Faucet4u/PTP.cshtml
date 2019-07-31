@@ -1,0 +1,216 @@
+@page
+@model AdminPanel.Pages.Faucet4u.PTPModel
+@{
+    ViewData["Title"] = "PTP";
+    Layout = "Faucet4u_Layout";
+}
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+        <!-- PTP-- Add-->
+        <form asp-page-handler="AddPTP" method="post" class="border border-dark p-5">
+
+            <h3>Time based: 1 Credit = 1 Day</h3>
+            <h3>Hits based: 1 Credit = 1 Hit</h3>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Is this package time based ?</span>
+                </div>
+                <select class="browser-default custom-select" id="inputGroupSelect01" name="isTimeBased">
+                    <option value="1" selected>Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Credit</span>
+                </div>
+                <input type="number" class="form-control" placeholder="0" step="1" name="credit" aria-label="credit" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Target link</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Write the link here" name="link" aria-label="link" aria-describedby="basic-addon1">
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="submit">Add</button>
+        </form>
+
+        <!-- PTP-- Update-->
+        <form asp-page-handler="UpdatePTP" method="post" class="border border-dark p-5">
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Id</span>
+                </div>
+                <input type="text" class="form-control" placeholder="ID" name="id" aria-label="ID" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Target link</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Write the link here" name="link" aria-label="link" aria-describedby="basic-addon1">
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="submit">Update</button>
+        </form>
+
+        <!-- PTP-- Credit Update-->
+        <form asp-page-handler="UpdateCreditPTP" method="post" class="border border-dark p-5">
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Id</span>
+                </div>
+                <input type="text" class="form-control" placeholder="ID" name="id" aria-label="ID" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Credit</span>
+                </div>
+                <input type="number" class="form-control" placeholder="0" step="1" name="credit" aria-label="credit" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Credits</span>
+                </div>
+                <select class="browser-default custom-select" id="inputGroupSelect02" name="creditAction">
+                    <option value="Add" selected>Add</option>
+                    <option value="Retract">Retract</option>
+                    <option value="Replace">Replace</option>
+                </select>
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="submit">Add/Retract/Replace Credits</button>
+        </form>
+
+        <!-- PTP-- Delete-->
+        <form asp-page-handler="DeletePTP" method="post" class="border border-dark p-5">
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <button class="btn btn-unique waves-effect m-0" type="submit">Delete</button>
+                </div>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">PTP Link ID</span>
+                </div>
+                <input type="text" class="form-control" placeholder="ID" name="id" aria-label="ID" aria-describedby="basic-addon1">
+            </div>
+        </form>
+
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Id
+                    </th>
+                    <th class="th-sm">
+                        Creation
+                    </th>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Link
+                    </th>
+                    <th class="th-sm">
+                        Is time based ?
+                    </th>
+                    <th class="th-sm">
+                        Hits Received
+                    </th>
+                    <th class="th-sm">
+                        Credit
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Id
+                    </th>
+                    <th>
+                        Creation
+                    </th>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Link
+                    </th>
+                    <th>
+                        Is time based ?
+                    </th>
+                    <th>
+                        Hits Received
+                    </th>
+                    <th>
+                        Credit
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td class="clickableTableData" onClick="updateIdInput(this.innerHTML)">' + tableData[0][i].Id +
+                    '</td><td>' + moment(tableData[0][i].Creation).format('YYYY-MM-DD - hh:mm:ss A') +
+                    '</td><td>' + tableData[0][i].Username +
+                    '</td><td class="clickableTableData" onClick="updateLinkInput(this.innerHTML)">' + tableData[0][i].Link +
+                    '</td><td>' + tableData[0][i].IsTimeBased +
+                    '</td><td>' + tableData[0][i].HitsReceived +
+                    '</td><td class="clickableTableData" onClick="updateCreditInput(this.innerHTML)">' + tableData[0][i].Credit +
+                    '</td></tr>');
+
+            }
+
+            function updateIdInput(id) {
+
+                $('input[name=id]').val(id);
+                window.scrollTo(0, 0);
+            }
+
+            function updateLinkInput(link) {
+
+                $('input[name=link]').val(link);
+                window.scrollTo(0, 0);
+            }
+
+            function updateCreditInput(credit) {
+
+                $('input[name=credit]').val(credit);
+                window.scrollTo(0, 0);
+            }
+
+        </script>
+
+
+    </div>
+    <div class="col-3"></div>
+
+
+</div>

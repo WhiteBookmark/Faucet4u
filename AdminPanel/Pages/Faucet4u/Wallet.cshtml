@@ -1,0 +1,153 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.WalletModel
+@{
+    ViewData["Title"] = "Wallet";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col text-center">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <h3>Balance: <span id="mainBalance"></span></h3>
+        <h3>Address: <span id="mainAddress"></span></h3>
+
+        <!--Withdraw-->
+        <form asp-page-handler="Withdraw" method="post" class="border border-dark p-5">
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Address</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Address" name="address" aria-label="Address" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Amount</span>
+                </div>
+                <input type="number" id="amount" class="form-control" placeholder="0.00000000" name="amount" aria-label="Amount" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">2FA Code</span>
+                </div>
+                <input type="text" class="form-control" name="authy" aria-label="Authy" aria-describedby="basic-addon1">
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="submit">Withdraw/Send</button>
+        </form>
+
+    </div>
+    <div class="col-3"></div>
+</div>
+
+<div class="row">
+    <div class="col-1"></div>
+    <div class="col">
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        SessionId
+                    </th>
+                    <th class="th-sm">
+                        Session Expiry
+                    </th>
+                    <th class="th-sm">
+                        Date Time
+                    </th>
+                    <th class="th-sm">
+                        Name
+                    </th>
+                    <th class="th-sm">
+                        Amount
+                    </th>
+                    <th class="th-sm">
+                        Address
+                    </th>
+                    <th class="th-sm">
+                        Transaction
+                    </th>
+                    <th class="th-sm">
+                        Confirmations
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        SessionId
+                    </th>
+                    <th>
+                        Session Expiry
+                    </th>
+                    <th>
+                        Date Time
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <th>
+                        Address
+                    </th>
+                    <th>
+                        Transaction
+                    </th>
+                    <th>
+                        Confirmations
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="col-1"></div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+        $('#dtBasicExample').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+
+    var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+    document.getElementById("mainBalance").innerHTML = JSON.parse(tableData[0]).result.confirmed;
+    document.getElementById("mainAddress").innerHTML = JSON.parse(tableData[1]).result;
+
+    $("#amount").attr({
+        "max": JSON.parse(tableData[0]).result.confirmed,
+        "min": 0.00010000
+    });
+
+    for (i = 0; i < Object.keys(tableData[2]).length; i++) {
+
+        document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+            '<tr><td>' + tableData[2][i].SessionId +
+            '</td><td>' + moment(tableData[2][i].SessionExpiry).format('YYYY-MM-DD - hh:mm:ss A') +
+            '</td><td>' + moment(tableData[2][i].DateTime).format('YYYY-MM-DD - hh:mm:ss A') +
+            '</td><td>' + tableData[2][i].Name +
+            '</td><td>' + tableData[2][i].Amount.toFixed(8) +
+            '</td><td>' + tableData[2][i].Address +
+            '</td><td>' + tableData[2][i].Transaction +
+            '</td><td>' + tableData[2][i].Confirmations +
+            '</td></tr>');
+
+    }
+
+</script>

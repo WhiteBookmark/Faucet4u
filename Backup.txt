@@ -1,0 +1,37 @@
+<ul class="font-weight-bold">
+                        <li v-for="value in errorList">
+                            {{ value }}
+                        </li>
+                    </ul>
+                    <br />
+					
+					.then((response) => {
+                                        grecaptcha.reset();
+                                        this.apiResponse = response.data;
+                                        this.$cookie.set('sessionId', this.apiResponse.sessionId, { expires: '6h' });
+                                        this.$socket.emit('requestingUserData', JSON.stringify({ "sessionId": this.$cookie.get('sessionId') }));
+                                        this.$store.commit('isLoading', false);
+
+                                    })
+                                    .catch((error) => {
+                                        grecaptcha.reset();
+                                        this.apiResponse = error.response.data;
+
+                                        if (Object.keys(this.apiResponse).length > 1) {
+                                            for (var item in this.apiResponse) {
+                                                for (var subItem in this.apiResponse[item]) {
+                                                    this.errorList.push(this.apiResponse[item][subItem]);
+                                                    break;
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        else {
+                                            for (var item in this.apiResponse) {
+                                                this.errorList.push(this.apiResponse[item]);
+                                                break;
+                                            }
+                                        }
+
+                                        this.$store.commit('isLoading', false);
+                                    })

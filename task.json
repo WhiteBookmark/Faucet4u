@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Socket",
+      "command": "npm",
+      "args": ["socket"],
+      "options": {
+        "cwd": "${workspaceRoot}/Sockets"
+      }
+    },
+    {
+      "label": "Claim",
+      "command": "npm",
+      "args": ["claim"],
+      "options": {
+        "cwd": "${workspaceRoot}/Sockets"
+      }
+    },
+    {
+      "label": "Start Servers",
+      "dependsOn": ["Socket", "Claim"]
+    }
+  ]
+}

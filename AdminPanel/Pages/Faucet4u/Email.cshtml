@@ -1,0 +1,134 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.EmailModel
+@{
+    ViewData["Title"] = "Email";
+    Layout = "Faucet4u_Layout";
+}
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+
+        <form asp-page-handler="SendEmail" method="post" name="sendEmail" class="border border-dark p-5">
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Subject</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Write the subject here" name="subject" aria-label="subject" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Message</span>
+                </div>
+                <textarea type="text" id="message" placeholder="Write the message here" name="message" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="md-form input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Username/Email</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Type a star * if you want to send every user or use the button" id="usernameOrEmail" name="usernameOrEmail" aria-label="UsernameOrEmail" aria-describedby="basic-addon1">
+            </div>
+
+            <button class="btn btn-unique waves-effect m-0" type="button" onClick="beforeSubmit('*')">Send to all Users</button>
+            <button class="btn btn-unique waves-effect m-0" type="submit">Send Email to following Username/Email</button>
+        </form>
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+        <br />
+
+        <p class="bg-danger text-white">Email history: </p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Reference
+                    </th>
+                    <th class="th-sm">
+                        Date Time
+                    </th>
+                    <th class="th-sm">
+                        Recipient
+                    </th>
+                    <th class="th-sm">
+                        Subject
+                    </th>
+                    <th class="th-sm">
+                        Message
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Reference
+                    </th>
+                    <th>
+                        Date Time
+                    </th>
+                    <th>
+                        Recipient
+                    </th>
+                    <th>
+                        Subject
+                    </th>
+                    <th>
+                        Message
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData[0]).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend',
+                    '<tr><td>' + tableData[0][i].Reference +
+                    '</td><td>' + moment(tableData[0][i].DateTime).format('YYYY-MM-DD - hh:mm:ss A') +
+                    '</td><td>' + tableData[0][i].Recipient +
+                    '</td><td class="clickableTableData" onClick="updateSubjectInput(this.innerHTML)">' + tableData[0][i].Subject +
+                    '</td><td class="clickableTableData" onClick="updateMessageInput(this.innerHTML)">' + tableData[0][i].Message +
+                    '</td></tr>');
+
+            }
+
+            $('#tableBody').html($('#tableBody').html().replace(/\n/g, "<br />"));
+
+            function updateSubjectInput(subject) {
+
+                $('input[name=subject]').val(subject);
+                window.scrollTo(0, 0);
+            }
+
+            function updateMessageInput(message) {
+
+                $('textarea[name=message]').val(message.replace(/<br\s*[\/]?>/gi, "\n"));
+                window.scrollTo(0, 0);
+            }
+
+            function beforeSubmit(changeValue) {
+
+                document.getElementById("usernameOrEmail").value = changeValue;
+                document.sendEmail.submit();
+            }
+        </script>
+
+    </div>
+    <div class="col-3"></div>
+</div>
+

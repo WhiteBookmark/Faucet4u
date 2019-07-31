@@ -1,0 +1,1 @@
+7z a -tzip Compressed.zip -r -xr!node_modules -xr!.git -xr!.vs -xr!.sql -xr!.zip

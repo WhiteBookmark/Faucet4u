@@ -1,0 +1,116 @@
+﻿@page
+@model AdminPanel.Pages.Faucet4u.OfferwallModel
+@{
+    ViewData["Title"] = "Offerwall";
+    Layout = "Faucet4u_Layout";
+}
+
+
+<div class="row" style="margin-top: 10%;">
+    <div class="col-3"></div>
+    <div class="col">
+        <span class="text-success">@ViewData["Success"]</span>
+        <span class="text-danger">@ViewData["Failed"]</span>
+        <span class="text-danger">@ViewData["Error"]</span>
+        <br />
+    </div>
+    <div class="col-3"></div>
+
+</div>
+
+<div class="row">
+    <div class="col-1"></div>
+    <div class="col">
+
+        <p hidden id="tableData">@ViewData["TableData"]</p>
+
+        <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">
+                        Reference
+                    </th>
+                    <th class="th-sm">
+                        Username
+                    </th>
+                    <th class="th-sm">
+                        Offerwall
+                    </th>
+                    <th class="th-sm">
+                        Amount
+                    </th>
+                    <th class="th-sm">
+                        Status
+                    </th>
+                    <th class="th-sm">
+                        Date Time
+                    </th>
+                    <th class="th-sm">
+                        Campaign Id
+                    </th>
+                    <th class="th-sm">
+                        Campaign Name
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <th>
+                        Reference
+                    </th>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Offerwall
+                    </th>
+                    <th>
+                        Amount
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                    <th>
+                        Date Time
+                    </th>
+                    <th>
+                        Campaign Id
+                    </th>
+                    <th>
+                        Campaign Name
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                $('#dtBasicExample').DataTable();
+                $('.dataTables_length').addClass('bs-select');
+            });
+
+            var tableData = JSON.parse(document.getElementById('tableData').innerHTML);
+
+            for (i = 0; i < Object.keys(tableData).length; i++) {
+
+                document.getElementById("tableBody").insertAdjacentHTML('beforeend', '<tr><td>' +
+                    tableData[i].Reference + '</td><td>' +
+                    tableData[i].Username + '</td><td>' +
+                    tableData[i].Offerwall + '</td><td>' +
+                    tableData[i].Amount.toFixed(8) + '</td><td>' +
+                    tableData[i].Status + '</td><td>' +
+                    moment(tableData[i].DateTime).format('YYYY-MM-DD - hh:mm:ss A') + '</td><td>' +
+                    tableData[i].CampaignId + '</td><td>' +
+                    tableData[i].CampaignName + '</td></tr>');
+
+            }
+
+        </script>
+
+    </div>
+    <div class="col-1"></div>
+
+</div>
+
+

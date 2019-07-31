@@ -1,0 +1,508 @@
+--Admin panel, www files
+
+ @*<environment include="Development">
+            <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+            <link rel="stylesheet" href="~/css/site.css" />
+        </environment>
+        <environment exclude="Development">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+                  integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous"
+                  asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+                  asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+            <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        </environment>
+        <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>*@
+
+@*<environment include="Development">
+            <script src="~/lib/jquery/dist/jquery.js"></script>
+            <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+            <script src="~/js/site.js" asp-append-version="true"></script>
+        </environment>
+        <environment exclude="Development">
+            <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+                    asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                    asp-fallback-test="window.jQuery"
+                    crossorigin="anonymous"
+                    integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+            </script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+                    integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+                    asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                    asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                    crossorigin="anonymous">
+            </script>
+            <script src="~/js/site.min.js" asp-append-version="true"></script>
+        </environment>*@
+
+		--UserUI, AdvertiserPanelPTP
+
+		<mdb-row>
+                    <mdb-col> <standard-banner></standard-banner><br /> </mdb-col>
+                    <mdb-col> <standard-banner></standard-banner><br /> </mdb-col>
+                </mdb-row>
+
+                <h2 class="text-secondary">
+                    PTP Credits: {{ this.$store.state.userData[0].PTPCredit }}
+                </h2>
+                <h2 class="text-secondary">
+                    PTP Day Credits: {{ this.$store.state.userData[0].PTPDayCredit }}
+                </h2>
+                <br />
+
+                <mdb-btn v-on:click="advertisementSwitch = 1"
+                         color="secondary"
+                         size="sm">Add new advertisement</mdb-btn>
+                <mdb-btn v-on:click="advertisementSwitch = 2"
+                         color="secondary"
+                         size="sm">Manage advertisement</mdb-btn>
+                <mdb-btn v-on:click="advertisementSwitch = 3"
+                         color="secondary"
+                         size="sm">Current advertisement</mdb-btn>
+                <br />
+                <br />
+
+                <mdb-row v-if="advertisementSwitch === 1">
+                    <!--Add new advertisement-->
+                    <mdb-col>
+                        <mdb-card border="secondary"
+                                  class="mb-3 mx-auto"
+                                  style="max-width: 18rem;">
+                            <mdb-card-header class="text-secondary">Add new PTP advertisement</mdb-card-header>
+                            <mdb-card-body class="text-secondary">
+                                <mdb-card-text>
+                                    <p class="text-secondary" v-if="isTimeBased.value === false">1 Credit = 1 Hit</p>
+                                    <p class="text-secondary" v-else>1 Credit = 1 Day</p>
+                                    <v-select v-model="isTimeBased" :options="type"></v-select>
+                                    <br />
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="link"
+                                               v-model.trim="link"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Link</span>
+                                    </mdb-input>
+                                    <mdb-input v-if="isTimeBased.value === false" key="hits-credit" basic class="mb-3" v-validate="`required|min_value:0|max_value:${ this.$store.state.userData[0].PTPCredit }` " name="credit" v-model.trim="credit" type="number">
+                                        <span class="input-group-text" slot="prepend">Credit</span>
+                                    </mdb-input>
+                                    <mdb-input v-else basic class="mb-3" key="time-credit" v-validate="`required|min_value:0|max_value:${ this.$store.state.userData[0].PTPDayCredit }` " name="credit" v-model.trim="credit" type="number">
+                                        <span class="input-group-text" slot="prepend">Credit</span>
+                                    </mdb-input>
+
+                                    <span class="text-danger">
+                                        {{ errors.first("link") }} <br />
+                                        {{ errors.first("credit") }}
+                                    </span>
+
+                                    <mdb-btn v-on:click="ptpOrder()" color="secondary" size="sm">Add</mdb-btn>
+                                </mdb-card-text>
+                            </mdb-card-body>
+                        </mdb-card>
+                    </mdb-col>
+                </mdb-row>
+
+                <mdb-row v-if="advertisementSwitch === 2">
+                    <!--Manage an existing advertisement-->
+                    <mdb-col>
+                        <mdb-card border="secondary"
+                                  class="mb-3 mx-auto"
+                                  style="max-width: 18rem;">
+                            <mdb-card-header class="text-secondary">Edit existing advertisement</mdb-card-header>
+                            <mdb-card-body class="text-secondary">
+                                <mdb-card-text>
+                                    <p class="text-secondary" v-if="isTimeBased.value === false">1 Credit = 1 Hit</p>
+                                    <p class="text-secondary" v-else>1 Credit = 1 Day</p>
+                                    <v-select v-model="isTimeBased" :options="type"></v-select>
+                                    <br />
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="reference"
+                                               v-model.trim="reference"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Reference</span>
+                                    </mdb-input>
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="link"
+                                               v-model.trim="link"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Link</span>
+                                    </mdb-input>
+                                    <mdb-input v-if="isTimeBased.value === false" key="hits-credit" basic class="mb-3" v-validate="`required|min_value:0|max_value:${ this.$store.state.userData[0].PTPCredit }` " name="credit" v-model.trim="credit" type="number">
+                                        <span class="input-group-text" slot="prepend">Credit</span>
+                                    </mdb-input>
+
+                                    <span class="text-danger">
+                                        {{ errors.first("reference") }} <br />
+                                        {{ errors.first("link") }} <br />
+                                        {{ errors.first("credit") }}
+                                        <span v-if="doesntExist">You do not have any such referenced ptp order.</span><br />
+                                    </span>
+
+                                    <mdb-btn v-on:click="updatePTPOrder()" color="secondary" size="sm">Update</mdb-btn>
+                                </mdb-card-text>
+                            </mdb-card-body>
+                        </mdb-card>
+
+                        <mdb-card border="secondary"
+                                  class="mb-3 mx-auto"
+                                  style="max-width: 18rem;">
+                            <mdb-card-header class="text-secondary">Manage PTP Advertisement</mdb-card-header>
+                            <mdb-card-body class="text-secondary">
+                                <mdb-card-title tag="h5">
+                                    Note: You cannot add credits in time based
+                                    advertisement
+                                </mdb-card-title>
+
+                                <mdb-btn v-on:click="managePTPSwitch = 1"
+                                         color="secondary"
+                                         size="sm">Hits Based</mdb-btn>
+                                <mdb-btn v-on:click="managePTPSwitch = 2"
+                                         color="secondary"
+                                         size="sm">Time Based</mdb-btn>
+                                <br />
+                                <br />
+
+                                <mdb-card-text v-if="managePTPSwitch === 1">
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="reference"
+                                               v-model.trim="reference"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Reference</span>
+                                    </mdb-input>
+
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="modifyLink"
+                                               v-model.trim="modifyLink"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Modify Link</span>
+                                    </mdb-input>
+
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="
+                      `required|min_value:0|max_value:${
+                        this.$store.state.userData[0].PTPCredit
+                      }`
+                    "
+                                               name="credit"
+                                               v-model.trim="credit"
+                                               type="number">
+                                        <span class="input-group-text" slot="prepend">Add Credit</span>
+                                    </mdb-input>
+
+                                    <span class="text-danger">
+                                        {{ errors.first("reference") }} <br />
+                                        {{ errors.first("modifyLink") }} <br />
+                                        {{ errors.first("credit") }} <br />
+                                        <span v-if="doesntExist">You do not have any such referenced ptp order.</span>
+                                    </span>
+
+                                    <mdb-btn v-on:click="updatePTPOrder()"
+                                             color="secondary"
+                                             size="sm">Update</mdb-btn>
+                                </mdb-card-text>
+
+                                <mdb-card-text v-if="managePTPSwitch === 2">
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="reference"
+                                               v-model.trim="reference"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Reference</span>
+                                    </mdb-input>
+
+                                    <mdb-input basic
+                                               class="mb-3"
+                                               v-validate="'required'"
+                                               name="modifyLink"
+                                               v-model.trim="modifyLink"
+                                               type="text">
+                                        <span class="input-group-text" slot="prepend">Modify Link</span>
+                                    </mdb-input>
+
+                                    <span class="text-danger">
+                                        {{ errors.first("reference") }} <br />
+                                        {{ errors.first("modifyLink") }} <br />
+                                        <span v-if="doesntExist">You do not have any such referenced ptp order.</span><br />
+                                    </span>
+
+                                    <mdb-btn v-on:click="updatePTPDayOrder()"
+                                             color="secondary"
+                                             size="sm">Update</mdb-btn>
+                                </mdb-card-text>
+                            </mdb-card-body>
+                        </mdb-card>
+                    </mdb-col>
+                </mdb-row>
+
+                <mdb-row v-if="advertisementSwitch === 3">
+                    <mdb-col>
+                        <mdb-datatable v-bind:data="this.$store.state.reactivePTPOrderData"
+                                       v-bind:searching="true"
+                                       class="w-75"
+                                       v-bind:pagination="true"
+                                       striped
+                                       bordered
+                                       hover
+                                       small
+                                       autoWidth
+                                       responsive />
+                    </mdb-col>
+                </mdb-row>
+
+				//Extended mutations
+        ptpOrderHistory(state, value) {
+            state.ptpOrderHistory = value;
+
+            var ptpOrderData = {
+                columns: [
+                    {
+                        label: "Reference",
+                        field: "reference",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Created",
+                        field: "created",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Link",
+                        field: "link",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Is this time based ?",
+                        field: "isTimeBased",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Credit",
+                        field: "credit",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Hits Received",
+                        field: "hitsReceived",
+                        sort: "asc"
+                    }
+                ],
+                rows: []
+            };
+
+            for (var i = 0; i < Object.keys(value).length; i++) {
+                ptpOrderData.rows.push({
+                    reference: value[i].Reference,
+                    created: moment(value[i].Creation).format("YYYY-MM-DD - hh:mm:ss A"),
+                    link: value[i].Link,
+                    isTimeBased: value[i].IsTimeBased.toString(),
+                    credit: value[i].Credit,
+                    hitsReceived: value[i].HitsReceived
+                });
+            }
+
+            state.reactivePTPOrderData = ptpOrderData;
+        },
+
+        bannerOrderHistory(state, value) {
+            state.bannerOrderHistory = value;
+
+            var bannerOrderData = {
+                columns: [
+                    {
+                        label: "Reference",
+                        field: "reference",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Created",
+                        field: "created",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Image Link",
+                        field: "imageLink",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Target Link",
+                        field: "targetLink",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Is this time based ?",
+                        field: "isTimeBased",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Credit",
+                        field: "credit",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Impressions",
+                        field: "impressions",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Clicks",
+                        field: "clicks",
+                        sort: "asc"
+                    }
+                ],
+                rows: []
+            };
+
+            for (var i = 0; i < Object.keys(value).length; i++) {
+                bannerOrderData.rows.push({
+                    reference: value[i].Reference,
+                    created: moment(value[i].Creation).format("YYYY-MM-DD - hh:mm:ss A"),
+                    imageLink: value[i].ImageLink,
+                    targetLink: value[i].TargetLink,
+                    isTimeBased: value[i].IsTimeBased.toString(),
+                    credit: value[i].Credit,
+                    impressions: value[i].Impressions,
+                    clicks: value[i].Clicks
+                });
+            }
+
+            state.reactiveBannerOrderData = bannerOrderData;
+        },
+
+        squareBannerOrderHistory(state, value) {
+            state.squareBannerOrderHistory = value;
+
+            var squareBannerOrderData = {
+                columns: [
+                    {
+                        label: "Reference",
+                        field: "reference",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Created",
+                        field: "created",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Image Link",
+                        field: "imageLink",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Target Link",
+                        field: "targetLink",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Is this time based ?",
+                        field: "isTimeBased",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Credit",
+                        field: "credit",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Impressions",
+                        field: "impressions",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Clicks",
+                        field: "clicks",
+                        sort: "asc"
+                    }
+                ],
+                rows: []
+            };
+
+            for (var i = 0; i < Object.keys(value).length; i++) {
+                squareBannerOrderData.rows.push({
+                    reference: value[i].Reference,
+                    created: moment(value[i].Creation).format("YYYY-MM-DD - hh:mm:ss A"),
+                    imageLink: value[i].ImageLink,
+                    targetLink: value[i].TargetLink,
+                    isTimeBased: value[i].IsTimeBased.toString(),
+                    credit: value[i].Credit,
+                    impressions: value[i].Impressions,
+                    clicks: value[i].Clicks
+                });
+            }
+
+            state.reactiveSquareBannerOrderData = squareBannerOrderData;
+        },
+
+        bonusAdOrderHistory(state, value) {
+            state.bonusAdOrderHistory = value;
+
+            var bonusAdOrderData = {
+                columns: [
+                    {
+                        label: "Reference",
+                        field: "reference",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Created",
+                        field: "created",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Link",
+                        field: "link",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Is this time based ?",
+                        field: "isTimeBased",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Credit",
+                        field: "credit",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Title",
+                        field: "title",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Description",
+                        field: "description",
+                        sort: "asc"
+                    },
+                    {
+                        label: "Hits Received",
+                        field: "hitsReceived",
+                        sort: "asc"
+                    }
+                ],
+                rows: []
+            };
+
+            for (var i = 0; i < Object.keys(value).length; i++) {
+                this.bonusAdOrderData.rows.push({
+                    reference: value[i].Reference,
+                    created: moment(value[i].Creation).format("YYYY-MM-DD - hh:mm:ss A"),
+                    link: value[i].Link,
+                    isTimeBased: value[i].IsTimeBased.toString(),
+                    credit: value[i].Credit,
+                    title: value[i].Title,
+                    description: value[i].Description,
+                    hitsReceived: value[i].HitsReceived
+                });
+            }
+
+            state.reactiveBonusAdOrderData = bonusAdOrderData;
+        }

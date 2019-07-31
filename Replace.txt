@@ -1,0 +1,14 @@
+Server=localhost			Replace with:  	Server=localhost
+password: '123',			Replace with: 	password: '123',
+server: 'localhost',			Replace with: 	server: 'Server=localhost',
+6LdlcHIUAAAAABeY1f5_WKRCUf_ncPoupzMwqdnZ	Replace with: 6LdlcHIUAAAAABeY1f5_WKRCUf_ncPoupzMwqdnZ
+6LcJe3IUAAAAAPC0mVWjHfsKAmpOxRNtSw5v5zdx	Replace with: 6LcJe3IUAAAAAPC0mVWjHfsKAmpOxRNtSw5v5zdx
+E9q-HnaLJfSAe6XI7vHnxvH6.ivgXc7P		Replace with: E9q-HnaLJfSAe6XI7vHnxvH6.ivgXc7P
+6LdlcHIUAAAAAAA1AKcrXtpEFaTWs_q_urelthbZ	Replace with: 6LdlcHIUAAAAAAA1AKcrXtpEFaTWs_q_urelthbZ
+6LcJe3IUAAAAAKc6SPWOk0S4cNWEeWxCpqTc880g	Replace with: 6LcJe3IUAAAAAKc6SPWOk0S4cNWEeWxCpqTc880g
+7.ik62YmiFKx8NNhAaP9wwTk85XuAjuP		Replace with: 7.ik62YmiFKx8NNhAaP9wwTk85XuAjuP
+'http://localhost:5000				Replace with: 'http://localhost:5000
+'http://localhost:5001				Replace with: 'http://localhost:5001
+http://127.0.0.1:3000				Replace with: http://127.0.0.1:3000
+`http://localhost:8080				Replace with: `http://localhost:8080
+`http://localhost:8081				Replace with: `http://localhost:8081
