@@ -1,6 +1,6 @@
 ﻿using Faucet4u.Annotations;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,6 @@ namespace Faucet4u.Models
 {
     public class OtherModel
     {
-        public string amount { get; set; }
+        public string Amount { get; set; }
     }
 }

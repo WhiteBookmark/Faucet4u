@@ -1,54 +1,53 @@
-using Dapper;
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using AnnotationsVariable = Faucet4u.GlobalConnections.Variable.AnnotationsVariable;
+using System.Linq;
+using System.Reflection;
 
 namespace Faucet4u.Annotations
 {
     public class ReferenceExists : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
-
-
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
+                Guid Reference = (from SupportTicket in DB.Queryable<SupportTickets>()
+                                  where SupportTicket.Reference.Equals(new Guid(ValueAsString))
+                                  select SupportTicket.Reference).FirstOrDefault();
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                if (Guid.Equals(Reference, new Guid(ValueAsString)))
                 {
-                    string queryToExecute = "Select Reference from SupportTickets where Reference = @Reference";
-                    dynamic queryResult = connectionObject.QueryFirstOrDefault(queryToExecute, new { Reference = valueAsString });
-                    if (queryResult != null)
-                    {
-                        Guid referenceFromTable = queryResult.Reference;
-                        if (Guid.Equals(referenceFromTable, new Guid(valueAsString)))
-                        {
-                            return ValidationResult.Success;
-                        }
-                    }
-
+                    return ValidationResult.Success;
                 }
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.hackAttemptMessage, typeof(ReferenceExists).Name, valueAsString));
-                return errorResult.Value;
+
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.hackAttemptMessage, MethodBase.GetCurrentMethod().Name, ValueAsString)
+                });
+                return ErrorResult.Value;
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(Logs.unknownErrorMessage, typeof(ReferenceExists).Name, valueAsString), ex.ToString());
-                return errorResult.Value;
-
+                Log.Error(new Logs
+                {
+                    Message = String.Format(LogVariable.unknownErrorMessage, MethodBase.GetCurrentMethod().Name, ValueAsString),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
             }
-
         }
-
     }
 }

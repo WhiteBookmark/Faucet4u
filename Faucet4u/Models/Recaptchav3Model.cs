@@ -1,5 +1,5 @@
 ﻿using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

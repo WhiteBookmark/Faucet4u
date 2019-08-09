@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -22,25 +23,25 @@ namespace Faucet4u.Controllers
 
         // POST: api/Login
         [HttpPost]
-        public ActionResult Post([FromBody] LoginModel bodyValue)
+        public async Task<ActionResult> Post([FromBody] LoginModel bodyValue)
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    if (GetUserCountry.IsDifferent(bodyValue.username, bodyValue.ip))
+                    if (await GetUserCountry.IsDifferent(bodyValue.Username, bodyValue.IP))
                     {
-                        connectionObject.Execute("Exec InsertCheatHistory @UsernameInput = @Username, @Case = 4", new { Username = bodyValue.username });
+                        connectionObject.Execute("Exec InsertCheatHistory @UsernameInput = @Username, @Case = 4", new { Username = bodyValue.Username });
                     }
 
 
                     string queryToExecute = "Select Password from Users where Username = @Username";
                     DynamicParameters paramtersToPass = new DynamicParameters();
-                    paramtersToPass.Add("Username", bodyValue.username, DbType.String, ParameterDirection.Input);
+                    paramtersToPass.Add("Username", bodyValue.Username, DbType.String, ParameterDirection.Input);
                     dynamic hashedPassword = connectionObject.QueryFirstOrDefault(queryToExecute, paramtersToPass);
                     if (hashedPassword != null)
                     {
-                        if (BCrypt.Net.BCrypt.Verify(bodyValue.password, hashedPassword.Password))
+                        if (BCrypt.Net.BCrypt.Verify(bodyValue.Password, hashedPassword.Password))
                         {
 
 
@@ -49,18 +50,22 @@ namespace Faucet4u.Controllers
                                                 Update Users set SessionId = @SessionId, SessionExpiry = @SessionExpiry, LastLogin = getdate() where Username = @Username
                                                 END";
                             paramtersToPass.Add("SessionId", sessionIdGuid, DbType.Guid, ParameterDirection.Input);
-                            paramtersToPass.Add("SessionExpiry", DateTime.Now.AddHours(Other.sessionExpiryHoursToAdd).ToString("MM/dd/yyyy HH:mm:ss"), DbType.DateTime, ParameterDirection.Input);
+                            paramtersToPass.Add("SessionExpiry", DateTime.Now.AddHours(OtherVariable.SessionExpiryHoursToAdd).ToString("MM/dd/yyyy HH:mm:ss"), DbType.DateTime, ParameterDirection.Input);
                             paramtersToPass.Add("Success", true, DbType.Boolean, ParameterDirection.Input);
 
                             int affectedRows = connectionObject.Execute(queryToExecute, paramtersToPass);
                             if (Convert.ToBoolean(affectedRows))
                             {
-                                if (bodyValue.lsi != null)
+                                if (bodyValue.LSI != null)
                                 {
-                                    CheatTest.CheckMultipleAccount(sessionIdGuid.ToString(), bodyValue.lsi);
+                                    CheatTest.CheckMultipleAccount(sessionIdGuid.ToString(), bodyValue.LSI);
                                 }
                                 connectionObject.Execute("INSERT INTO LoginHistory(Username, Success) VALUES(@Username, @Success)", paramtersToPass);
-                                Log.Info(Guid.NewGuid(), String.Format(Logs.loginUserLoggedIn, bodyValue.username), IPinString: GetUserIPAddress.String(this.HttpContext));
+                                Log.Info(new Logs
+                                {
+                                    Message = String.Format(LogVariable.loginUserLoggedIn, bodyValue.Username),
+                                    IP = GetUserIPAddress.String(this.HttpContext),
+                                });
                                 return Ok(new { sessionId = sessionIdGuid.ToString() });
                             }
 
@@ -72,14 +77,26 @@ namespace Faucet4u.Controllers
 
                 }
 
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.loginFailedMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: bodyValue.username);
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.loginFailedMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Username = bodyValue.Username
+                });
                 return BadRequest(new { errors = new { message = new[] { UserVariable.loginFailedMessage } } });
 
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }

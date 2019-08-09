@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -25,11 +26,16 @@ namespace Faucet4u.Controllers
             try
             {
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    dynamic queryResult = connectionObject.QueryFirstOrDefault("Select Subject, Message, DateTime, Username, Locked from SupportTIckets where Reference = @Reference", new { Reference = bodyValue.reference });
+                    dynamic queryResult = connectionObject.QueryFirstOrDefault("Select Subject, Message, DateTime, Username, Locked from SupportTIckets where Reference = @Reference", new { Reference = bodyValue.Reference });
 
-                    Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                    Log.Info(new Logs
+                    {
+                        Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                        IP = GetUserIPAddress.String(this.HttpContext),
+                    });
+
                     return Ok(JsonConvert.SerializeObject(queryResult));
                 }
 
@@ -37,8 +43,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }
@@ -51,16 +64,16 @@ namespace Faucet4u.Controllers
             try
             {
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
 
                     string queryToExecute = "Insert into SupportTickets(Reference, Subject, Message, Username, Email) Values(@Reference, @Subject, @Message, @Username, @Email)";
                     DynamicParameters paramtersToPass = new DynamicParameters();
                     Guid referenceNumber = Guid.NewGuid();
                     paramtersToPass.Add("Reference", referenceNumber);
-                    paramtersToPass.Add("Subject", bodyValue.subject);
-                    paramtersToPass.Add("Message", bodyValue.message);
-                    dynamic usernameFromDatabase = connectionObject.QueryFirstOrDefault("Select Username from Users where SessionId = @SessionId", new { SessionId = bodyValue.sessionId });
+                    paramtersToPass.Add("Subject", bodyValue.Subject);
+                    paramtersToPass.Add("Message", bodyValue.Message);
+                    dynamic usernameFromDatabase = connectionObject.QueryFirstOrDefault("Select Username from Users where SessionId = @SessionId", new { SessionId = bodyValue.SessionId });
                     if (usernameFromDatabase != null)
                     {
                         if (usernameFromDatabase.Username != null)
@@ -76,12 +89,17 @@ namespace Faucet4u.Controllers
                     {
                         paramtersToPass.Add("Username", null);
                     }
-                    paramtersToPass.Add("Email", bodyValue.email);
+                    paramtersToPass.Add("Email", bodyValue.Email);
 
                     if (connectionObject.Execute(queryToExecute, paramtersToPass) > 0)
                     {
-                        Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
-                        return Ok(new { message = String.Format(SupportTickets.createdSuccessMessage, referenceNumber) });
+                        Log.Info(new Logs
+                        {
+                            Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                            IP = GetUserIPAddress.String(this.HttpContext),
+                        });
+
+                        return Ok(new { message = String.Format(SupportTicketsVariable.createdSuccessMessage, referenceNumber) });
                     }
 
                 }
@@ -90,8 +108,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }

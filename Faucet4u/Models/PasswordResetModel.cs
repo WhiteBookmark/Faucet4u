@@ -1,6 +1,6 @@
 using Faucet4u.Annotations;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -20,27 +20,27 @@ namespace Faucet4u.Models
         //[Recaptchav3(ErrorMessage = Recaptchav3Variable.invalidMessage)]
         //public string recaptchav3Response { get; set; }
 
-        [Required(ErrorMessage = Username.requiredErrorMessage)]
-        [StringLength(Username.maximumLength, MinimumLength = Username.minimumLength, ErrorMessage = Username.rangeErrorMessage)]
-        [RegularExpression(Username.regularExpression, ErrorMessage = Username.formatErrorMessage)]
-        [UsernameExists(ErrorMessage = Username.doesNotExist)]
-        [IsCodeNotExpired(ErrorMessage = ConfirmationCode.expiredErrorMessage)]
-        public string username { get; set; }
+        [Required(ErrorMessage = UsernameVariable.requiredErrorMessage)]
+        [StringLength(UsernameVariable.maximumLength, MinimumLength = UsernameVariable.minimumLength, ErrorMessage = UsernameVariable.rangeErrorMessage)]
+        [RegularExpression(UsernameVariable.regularExpression, ErrorMessage = UsernameVariable.formatErrorMessage)]
+        [UsernameExists(ErrorMessage = UsernameVariable.doesNotExist)]
+        [IsCodeNotExpired(ErrorMessage = ConfirmationCodeVariable.expiredErrorMessage)]
+        public string Username { get; set; }
 
-        [Required(ErrorMessage = ConfirmationCode.requiredErrorMessage)]
-        [RegularExpression(ConfirmationCode.regularExpression, ErrorMessage = ConfirmationCode.formatErrorMessage)]
-        public string confirmationCode { get; set; }
+        [Required(ErrorMessage = ConfirmationCodeVariable.requiredErrorMessage)]
+        [RegularExpression(ConfirmationCodeVariable.regularExpression, ErrorMessage = ConfirmationCodeVariable.formatErrorMessage)]
+        public string ConfirmationCode { get; set; }
 
-        [Required(ErrorMessage = Password.requiredErrorMessage)]
+        [Required(ErrorMessage = PasswordVariable.requiredErrorMessage)]
         [DataType(DataType.Password)]
-        [StringLength(Password.maximumLength, MinimumLength = Password.minimumLength, ErrorMessage = Password.rangeErrorMessage)]
-        public string password { get; set; }
+        [StringLength(PasswordVariable.maximumLength, MinimumLength = PasswordVariable.minimumLength, ErrorMessage = PasswordVariable.rangeErrorMessage)]
+        public string Password { get; set; }
 
-        [Required(ErrorMessage = Password.confirmRequiredErrorMessage)]
+        [Required(ErrorMessage = PasswordVariable.confirmRequiredErrorMessage)]
         [DataType(DataType.Password)]
-        [StringLength(Password.maximumLength, MinimumLength = Password.minimumLength, ErrorMessage = Password.rangeErrorMessage)]
-        [Compare("password", ErrorMessage = Password.confirmMismatchErrorMessage)]
-        public string confirmPassword { get; set; }
+        [StringLength(PasswordVariable.maximumLength, MinimumLength = PasswordVariable.minimumLength, ErrorMessage = PasswordVariable.rangeErrorMessage)]
+        [Compare("Password", ErrorMessage = PasswordVariable.confirmMismatchErrorMessage)]
+        public string ConfirmPassword { get; set; }
 
 
     }

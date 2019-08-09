@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -24,18 +24,29 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT Success, CONVERT(VARCHAR, DateTime, 22) AS DateTime FROM LoginHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.sessionId) });
+                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT Success, CONVERT(VARCHAR, DateTime, 22) AS DateTime FROM LoginHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.SessionId) });
 
-                    Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                    Log.Info(new Logs
+                    {
+                        Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                        IP = GetUserIPAddress.String(this.HttpContext),
+                    });
                     return Ok(JsonConvert.SerializeObject(result));
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new
                 {
                     errors = new
@@ -53,18 +64,29 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT CONVERT(VARCHAR, DepositDate, 22) AS DepositDate, Amount, Confirmations, Remarks FROM DepositHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.sessionId) });
+                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT CONVERT(VARCHAR, DepositDate, 22) AS DepositDate, Amount, Confirmations, Remarks FROM DepositHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.SessionId) });
 
-                    Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                    Log.Info(new Logs
+                    {
+                        Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                        IP = GetUserIPAddress.String(this.HttpContext)
+                    });
                     return Ok(JsonConvert.SerializeObject(result));
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new
                 {
                     errors = new
@@ -81,19 +103,30 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
 
-                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT WithdrawalType, CONVERT(VARCHAR, RequestedDate, 22) AS RequestedDate, RequestedAmount, (SELECT CASE WHEN Paid = 1 THEN 'Approved' WHEN Paid = 0 THEN 'Rejected' ELSE 'Pending' END AS Paid) AS Paid, WalletType, WalletAddress, Remarks FROM Withdrawal WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.sessionId) });
+                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT WithdrawalType, CONVERT(VARCHAR, RequestedDate, 22) AS RequestedDate, RequestedAmount, (SELECT CASE WHEN Paid = 1 THEN 'Approved' WHEN Paid = 0 THEN 'Rejected' ELSE 'Pending' END AS Paid) AS Paid, WalletType, WalletAddress, Remarks FROM Withdrawal WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.SessionId) });
 
-                    Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                    Log.Info(new Logs
+                    {
+                        Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                        IP = GetUserIPAddress.String(this.HttpContext),
+                    });
                     return Ok(JsonConvert.SerializeObject(result));
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new
                 {
                     errors = new
@@ -111,18 +144,29 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT CONVERT(VARCHAR, OrderDateTime, 22) AS OrderDateTime, Name, IsTimeBased, Credit, Price FROM OrderHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.sessionId) });
+                    IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT CONVERT(VARCHAR, OrderDateTime, 22) AS OrderDateTime, Name, IsTimeBased, Credit, Price FROM OrderHistory WHERE Username = @Username", new { Username = await GetUserUsername.String(bodyValue.SessionId) });
 
-                    Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                    Log.Info(new Logs
+                    {
+                        Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                        IP = GetUserIPAddress.String(this.HttpContext),
+                    });
                     return Ok(JsonConvert.SerializeObject(result));
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new
                 {
                     errors = new

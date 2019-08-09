@@ -1,39 +1,144 @@
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using API.DatabaseModels;
 
-namespace Faucet4u.GlobalConnections.Variable
+namespace API.GlobalConnections.Variable
 {
     //Some structs are named as "{structName}Variable" because those particular structs were conflicting with the name of important classes
-    public struct Other
+    public class LocalhostRotator
+    {
+        public string Image { get; set; } = "http://kingbtc.co/banners/banner1.gif";
+        public string Target { get; set; } = "http://kingbtc.co/?ref=admin";
+    }
+    public struct KeysVariable
+    {
+        public static readonly Guid SettingsKey = new Guid("8F0320A3-452A-49A8-B004-38E4811A2978");
+        public static readonly Guid RecordsKey = new Guid("046CC7B3-B579-4E40-916E-F76543DD5AF0");
+        public const string IPStackAPIKey = "0e11b2adc029d85b7d72621f39a8eaa6";
+        public const string SendEmailKey = "Ae^SolKz75H9";
+        public const string ExchangeAPIKey = "c7ffd9a4-e34c-4371-a68a-7d8f80a7f02b";
+        public static readonly Guid AdhitzSkyscraper = new Guid("076774DD-97FC-489A-B607-88D8A43593BD");
+    }
+    public struct HTMLCodeVariable
+    {
+        //Standard networks
+        public const string BannerRotatorStandard = "<iframe src=\"http://faucet4all.com/Ads/Standard.html\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AdhitzStandard = "<iframe src=\"http://faucet4all.com/Ads/AdhitzStandard.html\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AdhitzStandardText = "<iframe src=\"http://faucet4all.com/Ads/AdhitzStandardText.html\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AAdsStandard = "<iframe data-aa=\"1128057\" src=\"//ad.a-ads.com/1128057?size=468x60\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public static readonly string[] StandardNetworksArray =
+            { BannerRotatorStandard,
+            AdhitzStandard,
+            AdhitzStandardText,
+            AAdsStandard };
+
+        //Square networks
+        public const string BannerRotatorSquare125 = "<iframe src=\"http://faucet4all.com/Ads/Square.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AdhitzSquare125 = "<iframe src=\"http://faucet4all.com/Ads/AdhitzSquare125.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AdhitzSquare125Text = "<iframe src=\"http://faucet4all.com/Ads/AdhitzSquare125Text.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AAdsSquare125 = "<iframe data-aa=\"1128055\" src=\"//ad.a-ads.com/1128055?size=125x125\" scrolling=\"no\" style=\"width:125px; height:125px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public static readonly string[] SquareNetworksArray =
+            {BannerRotatorSquare125,
+            AdhitzSquare125,
+            AdhitzSquare125Text,
+            AAdsSquare125 };
+
+        //Skyscraper networks
+        public const string AdhitzSkyscraper = "<iframe src=\"http://faucet4all.com/Ads/AdhitzSkyscraper.html\" scrolling=\"no\" style=\"width:128px; height:608px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AdhitzSkyscraperText = "<iframe src=\"http://faucet4all.com/Ads/AdhitzSkyscraperText.html\" scrolling=\"no\" style=\"width:128px; height:608px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string AAdsSkyscraper = "<iframe data-aa=\"1132118\" src=\"//ad.a-ads.com/1132118?size=120x600\" scrolling=\"no\" style=\"width:128px; height:608px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public static readonly string[] SkyscraperNetworksArray =
+          {AdhitzSkyscraper,
+            AdhitzSkyscraperText,
+            AAdsSkyscraper};
+
+        //PTP Standard networks
+        public const string PTPAdhitzStandard = "<iframe src=\"http://ptp.faucet4all.com/Ads/AdhitzStandard.html\" scrolling=\"no\" style=\"width:478px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string PTPAdhitzStandardText = "<iframe src=\"http://ptp.faucet4all.com/Ads/AdhitzStandardText.html\" scrolling=\"no\" style=\"width:478px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string PTPAAdsStandard = "<iframe data-aa=\"1174119\" src=\"//ad.a-ads.com/1174119?size=468x60\" scrolling=\"no\" style=\"width:478px; height:60px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public static readonly string[] PTPStandardNetworksArray =
+           {PTPAdhitzStandard,
+            PTPAdhitzStandardText,
+            PTPAAdsStandard };
+
+        //PTP Square networks
+        public const string PTPBannerRotatorSquare125 = "<iframe src=\"http://faucet4all.com/Ads/Square.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string PTPAdhitzSquare125 = "<iframe src=\"http://ptp.faucet4all.com/Ads/AdhitzSquare125.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string PTPAdhitzSquare125Text = "<iframe src=\"http://ptp.faucet4all.com/Ads/AdhitzSquare125Text.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string PTPAAdsSquare125 = "<iframe data-aa=\"1130119\" src=\"//ad.a-ads.com/1130119?size=125x125\" scrolling=\"no\" style=\"width:125px; height:125px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public static readonly string[] PTPSquareNetworksArray =
+          {PTPBannerRotatorSquare125,
+            PTPAdhitzSquare125,
+            PTPAdhitzSquare125Text,
+            PTPAAdsSquare125};
+
+        //Dictionary access for a single loop code
+        public static readonly Dictionary<string, string[]> AllNetworks = new Dictionary<string, string[]>()
+        {
+            { "Standard", StandardNetworksArray },
+            { "Square", SquareNetworksArray },
+            { "Skyscraper", SkyscraperNetworksArray },
+            { "PTPStandard", PTPStandardNetworksArray },
+            { "PTPSquare", PTPSquareNetworksArray }
+        };
+
+        //Localhost
+        public const string LocalhostStandard = "<iframe src=\"http://localhost:8081/Ads/Standard.html\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string LocalhostSquare = "<iframe src=\"http://localhost:8081/Ads/Square.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string LocalhostSkyscraper = "<img src=\"http://moonbitcoin.cash/coin/120x600.gif\" alt=\"Faucet4all - Claim every 3 minutes !\" />";
+        public const string LocalhostPTPStandard = "<iframe src=\"http://localhost:8081/Ads/Standard.html\" scrolling=\"no\" style=\"width:476px; height:68px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+        public const string LocalhostPTPSquare = "<iframe src=\"http://localhost:8081/Ads/Square.html\" scrolling=\"no\" style=\"width:133px; height:133px; border:0px; padding:0; overflow:hidden\" allowtransparency=\"true\"></iframe>";
+
+        //Dictionary access for localhost networks for a single loop code
+        public static readonly Dictionary<string, string> LocalhostNetworks = new Dictionary<string, string>()
+        {
+            { "Standard", LocalhostStandard },
+            { "Square", LocalhostSquare },
+            { "Skyscraper", LocalhostSkyscraper },
+            { "PTPStandard", LocalhostPTPStandard },
+            { "PTPSquare", LocalhostPTPSquare }
+        };
+
+        //Localhost rotator data
+        public const string LocalhostStandardRotatorImage = "http://kingbtc.co/banners/banner1.gif";
+        public const string LocalhostStandardRotatorTarget = "http://kingbtc.co/?ref=admin";
+        public const string LocalhostSquareRotatorImage = "http://moonbitcoin.cash/coin/125x125.gif";
+        public const string LocalhostSquareRotatorTarget = "http://moonbitcoin.cash";
+
+        //Dictionary access for localhost rotators for a single loop code
+        public static readonly Dictionary<string, LocalhostRotator> LocalhostRotators = new Dictionary<string, LocalhostRotator>()
+        {
+            { "Standard", new LocalhostRotator { Image = LocalhostStandardRotatorImage, Target =  LocalhostStandardRotatorTarget} },
+            { "Square", new LocalhostRotator { Image = LocalhostSquareRotatorImage, Target =  LocalhostSquareRotatorTarget} }
+        };
+    }
+    public struct OtherVariable
     {
         public const string SQLConnectionString = "Server=localhost;Database=Faucet4u;Trusted_Connection=True;MultipleActiveResultSets=true";
-        public const string secondaryLogsPath = @"..\Files\SecondaryLogs.txt";
-        public const double minutesToAddInConfirmationCodeExpiryTime = 15;
-        public const double sessionExpiryHoursToAdd = 6;
-        public const string ipStackAPIKey = "0e11b2adc029d85b7d72621f39a8eaa6";
-        public const string ipStackAPI = "http://api.ipstack.com";
-        public const string blockchainRateAPI = "https://blockchain.info/tobtc";
-        public const string sendEmailKey = "Ae^SolKz75H9";
-        public const string exchangeAPIKey = "c7ffd9a4-e34c-4371-a68a-7d8f80a7f02b";
-        public const string exchangeAPISecure = "c9e88960ccdc1b06990290a3f423ec3b63519b674a90185dd863ec31c48c3477";
+        public const string SecondaryLogsPath = @"..\Files\SecondaryLogs.txt";
+        public const double MinutesToAddInConfirmationCodeExpiryTime = 15;
+        public const double SessionExpiryHoursToAdd = 6;
+        public const string IPStackAPI = "http://api.ipstack.com";
+        public const string BlockchainRateAPI = "https://blockchain.info/tobtc";
+        public const string ExchangeAPISecure = "c9e88960ccdc1b06990290a3f423ec3b63519b674a90185dd863ec31c48c3477";
     }
 
-    public struct Email
+    public struct EmailVariable
     {
-        public const int minimumLength = 3;
-        public const int maximumLength = 350;
-        public const string rangeErrorMessage = "Email address length should be between 3 and 350";
-        public const string formatErrorMessage = "Invalid email address";
-        public const string requiredErrorMessage = "Email address is required";
-        public const string alreadyExistsMessage = "An account is registered with this email address already";
-        public const string doesNotExistsMessage = "This email does not exist in database";
-        public const string alreadyConfirmedMessage = "Your email is already confirmed";
-        public const string notConfirmedMessaeg = "Your email is not confirmed";
+        public const int MinimumLength = 3;
+        public const int MaximumLength = 350;
+        public const string RangeErrorMessage = "Email address length should be between 3 and 350";
+        public const string FormatErrorMessage = "Invalid email address";
+        public const string RequiredErrorMessage = "Email address is required";
+        public const string AlreadyExistsMessage = "An account is registered with this email address already";
+        public const string DoesNotExistsMessage = "This email does not exist in database";
+        public const string AlreadyConfirmedMessage = "Your email is already confirmed";
+        public const string NotConfirmedMessaeg = "Your email is not confirmed";
     }
 
-    public struct Password
+    public struct PasswordVariable
     {
         public const int minimumLength = 10;
         public const int maximumLength = 128;
@@ -44,7 +149,7 @@ namespace Faucet4u.GlobalConnections.Variable
         public const string resetSuccessfulMessage = "Your password has been successfully reset";
     }
 
-    public struct Username
+    public struct UsernameVariable
     {
         public const int minimumLength = 3;
         public const int maximumLength = 10;
@@ -88,7 +193,7 @@ namespace Faucet4u.GlobalConnections.Variable
         public const string accountLocked = "Your account is locked as you tried to cheat or attempt hacks";
     }
 
-    public struct Logs //Logs messages are meant for server use only, especially for debugging/development mode
+    public struct LogVariable //Logs messages are meant for server use only, especially for debugging/development mode
     {
         //Those logs who cannot have details like bodyValue, provide whatever information it can be provided, otherwise provide the whole bodyValue
 
@@ -144,7 +249,7 @@ namespace Faucet4u.GlobalConnections.Variable
 
     }
 
-    public struct EmailClient
+    public struct EmailClientVariable
     {
         //public const string host = "smtp.yandex.com";
         //public const int port = 587;
@@ -158,24 +263,24 @@ namespace Faucet4u.GlobalConnections.Variable
         //public const int timeout = 10000;
         //public const string displayName = "Myself";
 
-        public const string host = "66.206.39.103";
-        public const int port = 25;
-        public const string username = "faucet4all";
-        public const string password = "U6%6!db9&Rdw";
-        public const string fromMailAddress = "donotreply@faucet4all.com";
-        public const string bodyMessage = @"
+        public const string Host = "66.206.39.103";
+        public const int Port = 25;
+        public const string Username = "faucet4all";
+        public const string Password = "U6%6!db9&Rdw";
+        public const string FromMailAddress = "donotreply@faucet4all.com";
+        public const string BodyMessage = @"
                                             Confirmation code: {0}
                                             Either click the below link or input the code manually by visiting http://www.faucet4all.com/#/EmailConfirm
                                             http://www.faucet4all.com/#/EmailConfirm?emailConfirmCode={0}";
-        public const string subjectMessage = "Faucet4all - Confirm your email";
-        public const bool useDefaultCredentials = false;
-        public const bool useSSL = false;
-        public const int timeout = 10000;
-        public const string displayName = "Faucet4all";
+        public const string SubjectMessage = "Faucet4all - Confirm your email";
+        public const bool UseDefaultCredentials = false;
+        public const bool UseSSL = false;
+        public const int Timeout = 10000;
+        public const string DisplayName = "Faucet4all";
 
     }
 
-    public struct ConfirmationCode
+    public struct ConfirmationCodeVariable
     {
         public const string requiredErrorMessage = "Confirmation code is required to confirm your email";
         public const string regularExpression = "(^([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})$)";
@@ -185,7 +290,7 @@ namespace Faucet4u.GlobalConnections.Variable
         public const string notExpiredErrorMessage = "Your confirmation code has not been expired and was already sent. Please allow up to 15 minutes before requesting confirmation code again";
     }
 
-    public struct Session
+    public struct SessionVariable
     {
         public const string requiredErrorMessage = "Session Id is required";
         public const string regularExpression = "(^([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})$)";
@@ -195,7 +300,7 @@ namespace Faucet4u.GlobalConnections.Variable
         public const string overrideValidation = "456a9477-e685-4ce9-b036-5819e8e2c468";
     }
 
-    public struct SupportTickets
+    public struct SupportTicketsVariable
     {
         public const string createdSuccessMessage = "Your support ticket is successfully created and will be replied within 48 hours, please note down your reference number {0}";
     }

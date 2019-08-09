@@ -1,49 +1,61 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Dapper;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Reflection;
 
 namespace Faucet4u.Annotations
 {
     public class UsernameExists : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
 
-
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
+                string Username = (from User in DB.Queryable<Users>()
+                                   where User.Username.Equals(ValueAsString)
+                                   select User.Username).FirstOrDefault();
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                if (!String.IsNullOrEmpty(Username))
                 {
-                    string queryToExecute = "Select Username from Users where Username = @Username";
-                    dynamic queryResult = connectionObject.QueryFirstOrDefault(queryToExecute, new { Username = valueAsString });
-                    if (queryResult != null)
+                    if (ValueAsString.Equals(Username, StringComparison.OrdinalIgnoreCase))
                     {
-                        string usernameFromQueryResult = queryResult.Username;
-                        if (valueAsString.Equals(usernameFromQueryResult, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return ValidationResult.Success;
-                        }
+                        return ValidationResult.Success;
                     }
-
                 }
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.usernameExistsUseOfNonExistingUsernameMessage, valueAsString));
-                return errorResult.Value;
+
+
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.usernameExistsUseOfNonExistingUsernameMessage, ValueAsString)
+                });
+                return ErrorResult.Value;
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.usernameExistsUnknownErrorMessage, valueAsString), ex.ToString());
-                return errorResult.Value;
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.usernameExistsUnknownErrorMessage, ValueAsString),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
 
             }
 

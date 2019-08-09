@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using API.DatabaseModels;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Faucet4u.Controllers
 {
@@ -32,15 +34,15 @@ namespace Faucet4u.Controllers
                 //    return BadRequest(new { message = UserVariable.countryDifferentMessage });
                 //}
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     string queryToExecute = "Select ConfirmationCode from Users where Email = @Email";
                     DynamicParameters paramtersToPass = new DynamicParameters();
-                    paramtersToPass.Add("Email", bodyValue.email, DbType.String, ParameterDirection.Input);
+                    paramtersToPass.Add("Email", bodyValue.Email, DbType.String, ParameterDirection.Input);
                     dynamic resultedConfirmationCode = connectionObject.QueryFirstOrDefault(queryToExecute, paramtersToPass);
                     if (resultedConfirmationCode != null)
                     {
-                        if (Guid.Equals(resultedConfirmationCode.ConfirmationCode, new Guid(bodyValue.confirmationCode)))
+                        if (Guid.Equals(resultedConfirmationCode.ConfirmationCode, new Guid(bodyValue.ConfirmationCode)))
                         {
                             queryToExecute = "Update Users Set IsConfirmed = 1 where Email = @Email";
                             int affectedRows = connectionObject.Execute(queryToExecute, paramtersToPass);
@@ -48,19 +50,34 @@ namespace Faucet4u.Controllers
                             {
                                 throw new Exception();
                             }
-                            Log.Info(Guid.NewGuid(), String.Format(Logs.userConfirmedEmailMessage, bodyValue.email), IPinString: GetUserIPAddress.String(this.HttpContext));
+                            Log.Info(new Logs
+                            {
+                                Message = String.Format(LogVariable.userConfirmedEmailMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                                IP = GetUserIPAddress.String(this.HttpContext)
+                            });
                             return Ok(new { message = UserVariable.emailConfirmSuccessfulMessage });
                         }
                     }
                 }
 
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.emailConfirmInvalidConfirmationCodeMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
-                return BadRequest(new { errors = new { message = new[] { ConfirmationCode.invalidCode } } });
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.emailConfirmInvalidConfirmationCodeMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
+                return BadRequest(new { errors = new { message = new[] { ConfirmationCodeVariable.invalidCode } } });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.emailConfirmUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.emailConfirmUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
 
@@ -68,7 +85,7 @@ namespace Faucet4u.Controllers
 
         //Use put for resending confirmation code for email
         [HttpPut]
-        public ActionResult Put([FromBody] ResendEmailModel bodyValue)
+        public async Task<ActionResult> Put([FromBody] ResendEmailModel bodyValue)
         {
             try
             {
@@ -78,18 +95,29 @@ namespace Faucet4u.Controllers
                 //    return BadRequest(new { message = UserVariable.countryDifferentMessage });
                 //}
 
-                bool wasConfirmationCodeSent = ConfirmUserEmail.SendCode(bodyValue.email);
+                bool wasConfirmationCodeSent = await ConfirmUserEmail.SendCode(bodyValue.Email);
                 if (wasConfirmationCodeSent == false)
                 {
                     throw new Exception();
                 }
-                Log.Info(Guid.NewGuid(), String.Format(Logs.emailConfirmResendMessage, bodyValue.email), IPinString: GetUserIPAddress.String(this.HttpContext));
+                Log.Info(new Logs
+                {
+                    Message = String.Format(LogVariable.emailConfirmResendMessage, Request.Path.Value, bodyValue.Email),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
                 return Ok(new { message = UserVariable.emailConfirmResendMessage });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.emailConfirmResendEmailUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.emailConfirmResendEmailUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }

@@ -1,5 +1,5 @@
 using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,25 +12,25 @@ namespace Faucet4u.Models
     {
         //[Required(ErrorMessage = Recaptchav2Variable.requiredErrorMessage)]
         //[Recaptchav2(ErrorMessage = Recaptchav2Variable.invalidMessage)]
-        //public string recaptchav2Response { get; set; }
+        //public string Recaptchav2Response { get; set; }
 
         //[Required(ErrorMessage = Recaptchav3Variable.requiredErrorMessage)]
         //[Recaptchav3(ErrorMessage = Recaptchav3Variable.invalidMessage)]
-        //public string recaptchav3Response { get; set; }
+        //public string Recaptchav3Response { get; set; }
 
-        public string sessionId { get; set; }
+        public string SessionId { get; set; }
 
-        [Required(ErrorMessage = Email.requiredErrorMessage)]
-        [DataType(DataType.EmailAddress, ErrorMessage = Email.formatErrorMessage)]
-        [StringLength(Email.maximumLength, MinimumLength = Email.minimumLength, ErrorMessage = Email.rangeErrorMessage)]
-        public string email { get; set; }
+        [Required(ErrorMessage = EmailVariable.RequiredErrorMessage)]
+        [DataType(DataType.EmailAddress, ErrorMessage = EmailVariable.FormatErrorMessage)]
+        [StringLength(EmailVariable.MaximumLength, MinimumLength = EmailVariable.MinimumLength, ErrorMessage = EmailVariable.RangeErrorMessage)]
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "Subject is required")]
         [StringLength(70, MinimumLength = 10)]
-        public string subject { get; set; }
+        public string Subject { get; set; }
 
         [Required(ErrorMessage = "Message is required")]
         [StringLength(9999999, MinimumLength = 10)]
-        public string message { get; set; }
+        public string Message { get; set; }
     }
 }

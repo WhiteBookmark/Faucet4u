@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -22,23 +23,34 @@ namespace Faucet4u.Controllers
 
         //User put for sending confirmation code for password reset
         [HttpPut]
-        public ActionResult Put([FromBody] PasswordResetCodeModel bodyValue)
+        public async Task<ActionResult> Put([FromBody] PasswordResetCodeModel bodyValue)
         {
             try
             {
 
-                bool wasConfirmationCodeSent = PasswordReset.SendCode(bodyValue.email);
+                bool wasConfirmationCodeSent = await PasswordReset.SendCode(bodyValue.Email);
                 if (wasConfirmationCodeSent == false)
                 {
                     throw new Exception();
                 }
-                Log.Info(Guid.NewGuid(), String.Format(Logs.emailConfirmResendMessage, bodyValue.email), IPinString: GetUserIPAddress.String(this.HttpContext));
+                Log.Info(new Logs
+                {
+                    Message = String.Format(LogVariable.emailConfirmResendMessage, bodyValue.Email),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                });
                 return Ok(new { message = UserVariable.passwordResetCodeMessage });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.passwordResetCodeUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.passwordResetCodeUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }
@@ -51,37 +63,52 @@ namespace Faucet4u.Controllers
             try
             {
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     string queryToExecute = "Select ConfirmationCode from Users where Username = @Username";
                     DynamicParameters paramtersToPass = new DynamicParameters();
-                    paramtersToPass.Add("Username", bodyValue.username, DbType.String, ParameterDirection.Input);
+                    paramtersToPass.Add("Username", bodyValue.Username, DbType.String, ParameterDirection.Input);
                     dynamic resultedConfirmationCode = connectionObject.QueryFirstOrDefault(queryToExecute, paramtersToPass);
                     if (resultedConfirmationCode != null)
                     {
-                        if (Guid.Equals(resultedConfirmationCode.ConfirmationCode, new Guid(bodyValue.confirmationCode)))
+                        if (Guid.Equals(resultedConfirmationCode.ConfirmationCode, new Guid(bodyValue.ConfirmationCode)))
                         {
                             queryToExecute = "Update Users Set Password = @Password where Username = @Username";
-                            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(bodyValue.password);
+                            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(bodyValue.Password);
                             paramtersToPass.Add("@Password", hashedPassword, dbType: DbType.String, direction: ParameterDirection.Input);
                             int affectedRows = connectionObject.Execute(queryToExecute, paramtersToPass);
                             if (Convert.ToBoolean(affectedRows) != true)
                             {
                                 throw new Exception();
                             }
-                            Log.Info(Guid.NewGuid(), String.Format(Logs.passwordResetMessage, bodyValue.username), IPinString: GetUserIPAddress.String(this.HttpContext));
-                            return Ok(new { message = Password.resetSuccessfulMessage });
+                            Log.Info(new Logs
+                            {
+                                Message = String.Format(LogVariable.passwordResetMessage, bodyValue.Username),
+                                IP = GetUserIPAddress.String(this.HttpContext),
+                            });
+                            return Ok(new { message = PasswordVariable.resetSuccessfulMessage });
                         }
                     }
                 }
 
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.passwordResetInvalidCodeMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
-                return BadRequest(new { errors = new { message = new[] { ConfirmationCode.invalidCode } } });
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.passwordResetInvalidCodeMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
+                return BadRequest(new { errors = new { message = new[] { ConfirmationCodeVariable.invalidCode } } });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.passwordResetUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.passwordResetUnknownErrorMessage, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
 

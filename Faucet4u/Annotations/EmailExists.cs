@@ -1,54 +1,56 @@
-using Dapper;
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using AnnotationsVariable = Faucet4u.GlobalConnections.Variable.AnnotationsVariable;
+using System.Linq;
 
 namespace Faucet4u.Annotations
 {
     public class EmailExists : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
-
-
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
+                string Email = (from User in DB.Queryable<Users>()
+                                where User.Email.Equals(ValueAsString)
+                                select User.Email).FirstOrDefault();
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                if (!String.IsNullOrEmpty(Email))
                 {
-                    string queryToExecute = "Select Email from Users where Email = @Email";
-                    dynamic queryResult = connectionObject.QueryFirstOrDefault(queryToExecute, new { Email = valueAsString });
-                    if (queryResult != null)
+                    if (ValueAsString.Equals(Email, StringComparison.OrdinalIgnoreCase))
                     {
-                        string emailFromQueryResult = queryResult.Email;
-                        if (valueAsString.Equals(emailFromQueryResult, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return ValidationResult.Success;
-                        }
+                        return ValidationResult.Success;
                     }
-
                 }
-                Log.Hack(Guid.NewGuid(), String.Format(Logs.emailExistsUseOfNonExistingEmailMessage, valueAsString));
-                return errorResult.Value;
+
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.emailExistsUseOfNonExistingEmailMessage, ValueAsString)
+                });
+                return ErrorResult.Value;
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.emailExistsUnknownErrorMessage, valueAsString), ex.ToString());
-                return errorResult.Value;
-
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.emailExistsUnknownErrorMessage, Value),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
             }
-
         }
-
     }
 }

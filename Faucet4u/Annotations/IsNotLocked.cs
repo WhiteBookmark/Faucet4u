@@ -1,53 +1,58 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Dapper;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Faucet4u.Annotations
 {
     public class IsNotLocked : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
-                using (SqlConnection connection = new SqlConnection(Other.SQLConnectionString))
+                bool Locked = (from User in DB.Queryable<Users>()
+                               where User.Username.Equals(ValueAsString)
+                               select User.Locked).FirstOrDefault();
+
+                if (Locked)
                 {
-                    string queryToExecute = "Select Locked from Users where Username = @Username";
-                    DynamicParameters parametersToAdd = new DynamicParameters();
-                    parametersToAdd.Add("Username", valueAsString, DbType.String, ParameterDirection.Input);
-                    dynamic returnedResult = connection.QueryFirstOrDefault(queryToExecute, parametersToAdd);
-                    if (returnedResult != null)
+                    Log.Hack(new Logs
                     {
-                        if (returnedResult.Locked)
-                        {
-                            Log.Hack(Guid.NewGuid(), String.Format(Logs.hackAttemptMessage, typeof(IsNotLocked).Name, valueAsString), Username: valueAsString);
-                            return errorResult.Value;
-                        }
-                    }
-
-                    return ValidationResult.Success;
+                        Message = String.Format(LogVariable.hackAttemptMessage, MethodBase.GetCurrentMethod().Name, ValueAsString)
+                    });
+                    return ErrorResult.Value;
                 }
+
+
+                return ValidationResult.Success;
+
 
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(Logs.unknownErrorMessage, typeof(IsNotLocked).Name, valueAsString), ex.ToString());
-                return errorResult.Value;
+                Log.Error(new Logs
+                {
+                    Message = String.Format(LogVariable.unknownErrorMessage, MethodBase.GetCurrentMethod().Name, ValueAsString),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
 
             }
 

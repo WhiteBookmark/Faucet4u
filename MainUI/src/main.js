@@ -41,13 +41,13 @@ Vue.prototype.moment = moment;
 Vue.prototype.$http = axios;
 Vue.prototype.axios = axios;
 
-Vue.use(
-    new VueSocketIO({
-        debug: true,
-        connection: "http://127.0.0.1:3000",
-        transports: ["websocket"]
-    })
-);
+//Vue.use(
+//    new VueSocketIO({
+//        debug: true,
+//        connection: "http://127.0.0.1:3000",
+//        transports: ["websocket"]
+//    })
+//);
 
 Vue.component("v-select", vSelect);
 Vue.component("standard-banner", StandardBanner);

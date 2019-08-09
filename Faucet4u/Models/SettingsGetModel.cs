@@ -1,5 +1,5 @@
 using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,12 +12,12 @@ namespace Faucet4u.Models
     {
         [Required(ErrorMessage = Recaptchav3Variable.requiredErrorMessage)]
         [Recaptchav3(ErrorMessage = Recaptchav3Variable.invalidMessage)]
-        public string recaptchav3Response { get; set; }
+        public string Recaptchav3Response { get; set; }
 
-        [Required(ErrorMessage = Session.requiredErrorMessage)]
-        [RegularExpression(Session.regularExpression, ErrorMessage = Session.formatErrorMessage)]
-        [SessionValid(ErrorMessage = Session.invalidSessionId)]
-        [SessionNotExpired(ErrorMessage = Session.expiredErrorMessage)]
-        public string sessionId { get; set; }
+        [Required(ErrorMessage = SessionVariable.requiredErrorMessage)]
+        [RegularExpression(SessionVariable.regularExpression, ErrorMessage = SessionVariable.formatErrorMessage)]
+        [SessionValid(ErrorMessage = SessionVariable.invalidSessionId)]
+        [SessionNotExpired(ErrorMessage = SessionVariable.expiredErrorMessage)]
+        public string SessionId { get; set; }
     }
 }

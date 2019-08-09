@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +21,7 @@ namespace Faucet4u.Controllers
     {
         [HttpPost]
         [Route("Hitswall")]
-        public ActionResult GetHitswall([FromForm] OfferwallModel bodyValue)
+        public async Task<ActionResult> GetHitswall([FromForm] OfferwallModel bodyValue)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace Faucet4u.Controllers
                 Console.WriteLine(JsonConvert.SerializeObject(bodyValue));
                 if (bodyValue.pwd.Equals(password))
                 {
-                    using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                    using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                     {
                         string queryToExecute = @"BEGIN
                                                     INSERT INTO OfferwallHistory(Username, Offerwall, Amount, Status, CampaignId, CampaignName) VALUES(@Username, @Offerwall, @Amount, @Status, @CampaignId, @CampaignName)
@@ -42,7 +42,7 @@ namespace Faucet4u.Controllers
                         paramtersToPass.Add("Username", bodyValue.u, DbType.String, ParameterDirection.Input);
 
 
-                        double convertedAmount = ConvertTo.Bitcoin(bodyValue.c);
+                        double convertedAmount = await ConvertTo.Bitcoin(bodyValue.c);
 
                         if (bodyValue.t.Equals("1"))
                         {
@@ -85,7 +85,7 @@ namespace Faucet4u.Controllers
 
         [HttpGet]
         [Route("PTCWall")]
-        public ActionResult GetPTCWall([FromQuery] OfferwallModel bodyValue)
+        public async Task<ActionResult> GetPTCWall([FromQuery] OfferwallModel bodyValue)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace Faucet4u.Controllers
                 Console.WriteLine(JsonConvert.SerializeObject(bodyValue));
                 if (bodyValue.pwd.Equals(password))
                 {
-                    using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                    using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                     {
                         string queryToExecute = @"BEGIN
                         INSERT INTO OfferwallHistory(Username, Offerwall, Amount, Status) VALUES(@Username, @Offerwall, @Amount, @Status)
@@ -105,7 +105,7 @@ namespace Faucet4u.Controllers
                         DynamicParameters paramtersToPass = new DynamicParameters();
                         paramtersToPass.Add("Username", bodyValue.usr, DbType.String, ParameterDirection.Input);
 
-                        double convertedAmount = ConvertTo.Bitcoin(bodyValue.r);
+                        double convertedAmount = await ConvertTo.Bitcoin(bodyValue.r);
 
                         if (bodyValue.t.Equals("1"))
                         {
@@ -147,7 +147,7 @@ namespace Faucet4u.Controllers
 
         [HttpPost]
         [Route("SkippyAds")]
-        public ActionResult GetSkippyAds([FromQuery] OfferwallModel bodyValue)
+        public async Task<ActionResult> GetSkippyAds([FromQuery] OfferwallModel bodyValue)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace Faucet4u.Controllers
                 Console.WriteLine(JsonConvert.SerializeObject(bodyValue));
                 if (bodyValue.pwd.Equals(password))
                 {
-                    using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                    using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                     {
                         string queryToExecute = @"BEGIN
                                                     INSERT INTO OfferwallHistory(Username, Offerwall, Amount, Status, CampaignId, CampaignName) VALUES(@Username, @Offerwall, @Amount, @Status, @CampaignId, @CampaignName)
@@ -168,7 +168,7 @@ namespace Faucet4u.Controllers
                         paramtersToPass.Add("Username", bodyValue.u, DbType.String, ParameterDirection.Input);
 
 
-                        double convertedAmount = ConvertTo.Bitcoin(bodyValue.c);
+                        double convertedAmount = await ConvertTo.Bitcoin(bodyValue.c);
 
                         if (bodyValue.t.Equals("1"))
                         {
@@ -212,7 +212,7 @@ namespace Faucet4u.Controllers
 
         [HttpGet]
         [Route("KiwiWall")]
-        public ActionResult GetKiwiWall([FromQuery] OfferwallModel bodyValue)
+        public async Task<ActionResult> GetKiwiWall([FromQuery] OfferwallModel bodyValue)
         {
             try
             {
@@ -222,7 +222,7 @@ namespace Faucet4u.Controllers
                 Console.WriteLine(md5Signature);
                 if (bodyValue.signature.Equals(md5Signature, StringComparison.OrdinalIgnoreCase))
                 {
-                    using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                    using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                     {
                         string queryToExecute = @"BEGIN
                                                     DECLARE @UserId uniqueidentifier = TRY_CONVERT(UNIQUEIDENTIFIER, @Id)
@@ -242,7 +242,7 @@ namespace Faucet4u.Controllers
                         paramtersToPass.Add("Id", bodyValue.sub_id, DbType.String, ParameterDirection.Input);
 
 
-                        double convertedAmount = ConvertTo.Bitcoin(bodyValue.amount);
+                        double convertedAmount = await ConvertTo.Bitcoin(bodyValue.amount);
 
 
                         if (bodyValue.status.Equals("1"))
@@ -284,7 +284,7 @@ namespace Faucet4u.Controllers
 
         [HttpGet]
         [Route("OfferToro")]
-        public ActionResult GetOfferToro([FromQuery] OfferwallModel bodyValue)
+        public async Task<ActionResult> GetOfferToro([FromQuery] OfferwallModel bodyValue)
         {
             try
             {
@@ -294,7 +294,7 @@ namespace Faucet4u.Controllers
                 Console.WriteLine(md5Signature);
                 if (bodyValue.sig.Equals(md5Signature, StringComparison.OrdinalIgnoreCase))
                 {
-                    using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                    using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                     {
                         string queryToExecute = @"BEGIN
                                                     DECLARE @UserId uniqueidentifier = TRY_CONVERT(UNIQUEIDENTIFIER, @Id)
@@ -313,7 +313,7 @@ namespace Faucet4u.Controllers
                         DynamicParameters paramtersToPass = new DynamicParameters();
                         paramtersToPass.Add("Id", bodyValue.user_id, DbType.String, ParameterDirection.Input);
 
-                        double convertedAmount = ConvertTo.Bitcoin(bodyValue.amount);
+                        double convertedAmount = await ConvertTo.Bitcoin(bodyValue.amount);
 
                         if (bodyValue.status.Equals("1"))
                         {

@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -25,11 +26,11 @@ namespace Faucet4u.Controllers
     {
 
         public static HttpClient httpClient = new HttpClient();
-        private static string electrumUsername = "faucet4all";
-        private static string electrumPassword = "35WtyWW5jj2TI9";
+        private const string electrumUsername = "faucet4all";
+        private const string electrumPassword = "35WtyWW5jj2TI9";
         //private static string electrumHost = "http://66.206.39.103:7778";
-        private static string electrumHost = "http://66.206.39.103:7777";
-        private static string apiKey = "OyDSf6q7wx%m";
+        private const string electrumHost = "http://66.206.39.103:7777";
+        private const string apiKey = "OyDSf6q7wx%m";
 
         [HttpGet]
         [Route("GetMainBalance")]
@@ -37,7 +38,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -53,8 +54,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -65,7 +73,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -82,8 +90,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -95,14 +110,14 @@ namespace Faucet4u.Controllers
             try
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
-                string transactionMessage = $"Deposit request for user: {GetUserUsername.String(bodyValue.sessionId)} and amount: {bodyValue.amount}";
+                string transactionMessage = $"Deposit request for user: {GetUserUsername.String(bodyValue.SessionId)} and amount: {bodyValue.Amount}";
                 string json = JsonConvert.SerializeObject(new
                 {
                     id = Guid.NewGuid().ToString(),
                     method = "addrequest",
                     @params = new
                     {
-                        amount = bodyValue.amount,
+                        amount = bodyValue.Amount,
                         memo = transactionMessage,
                         force = "true"
                     }
@@ -112,9 +127,9 @@ namespace Faucet4u.Controllers
                 string result = response.Content.ReadAsStringAsync().Result;
                 JObject parsedResult = JObject.Parse(result);
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
-                    string username = await GetUserUsername.String(bodyValue.sessionId);
+                    string username = await GetUserUsername.String(bodyValue.SessionId);
                     string queryToExecute = "INSERT INTO DepositHistory(Username, Amount, WalletType, WalletAddress, InvoiceId, Remarks) VALUES(@Username, @Amount, @WalletType, @WalletAddress, @InvoiceId, @Remarks)";
                     DynamicParameters parametersToPass = new DynamicParameters();
                     parametersToPass.Add("Username", username, DbType.String, ParameterDirection.Input);
@@ -130,8 +145,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -142,7 +164,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -152,7 +174,7 @@ namespace Faucet4u.Controllers
                     method = "getrequest",
                     @params = new
                     {
-                        key = bodyValue.address
+                        key = bodyValue.Address
                     }
                 });
                 HttpResponseMessage response = httpClient.PostAsync(electrumHost, new StringContent(json, Encoding.UTF8, "application/json")).Result;
@@ -161,8 +183,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -173,7 +202,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -183,8 +212,8 @@ namespace Faucet4u.Controllers
                     method = "payto",
                     @params = new
                     {
-                        destination = bodyValue.address,
-                        amount = bodyValue.amount,
+                        destination = bodyValue.Address,
+                        amount = bodyValue.Amount,
                         rbf = "true",
                         fee = 0.00000400
                     }
@@ -202,8 +231,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -214,7 +250,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -224,7 +260,7 @@ namespace Faucet4u.Controllers
                     method = "broadcast",
                     @params = new
                     {
-                        tx = bodyValue.transaction,
+                        tx = bodyValue.Transaction,
                     }
                 });
                 HttpResponseMessage response = httpClient.PostAsync(electrumHost, new StringContent(json, Encoding.UTF8, "application/json")).Result;
@@ -239,8 +275,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }
@@ -251,7 +294,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                if (bodyValue.apiKey != apiKey)
+                if (bodyValue.APIKey != apiKey)
                     return BadRequest("Incorrect key");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{electrumUsername}:{electrumPassword}")));
@@ -261,7 +304,7 @@ namespace Faucet4u.Controllers
                     method = "get_tx_status",
                     @params = new
                     {
-                        txid = bodyValue.transaction
+                        txid = bodyValue.Transaction
                     }
                 });
                 HttpResponseMessage response = httpClient.PostAsync(electrumHost, new StringContent(json, Encoding.UTF8, "application/json")).Result;
@@ -276,8 +319,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
             }
         }

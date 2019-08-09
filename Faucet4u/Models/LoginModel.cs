@@ -1,5 +1,5 @@
 using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,20 +18,20 @@ namespace Faucet4u.Models
         //[Recaptchav3(ErrorMessage = Recaptchav3Variable.invalidMessage)]
         //public string recaptchav3Response { get; set; }
 
-        [Required(ErrorMessage = Username.requiredErrorMessage)]
-        [StringLength(Username.maximumLength, MinimumLength = Username.minimumLength, ErrorMessage = Username.rangeErrorMessage)]
-        [RegularExpression(Username.regularExpression, ErrorMessage = Username.formatErrorMessage)]
-        [UsernameExists(ErrorMessage = Username.doesNotExist)]
+        [Required(ErrorMessage = UsernameVariable.requiredErrorMessage)]
+        [StringLength(UsernameVariable.maximumLength, MinimumLength = UsernameVariable.minimumLength, ErrorMessage = UsernameVariable.rangeErrorMessage)]
+        [RegularExpression(UsernameVariable.regularExpression, ErrorMessage = UsernameVariable.formatErrorMessage)]
+        [UsernameExists(ErrorMessage = UsernameVariable.doesNotExist)]
         [IsNotLocked(ErrorMessage = UserVariable.accountLocked)]
-        public string username { get; set; }
+        public string Username { get; set; }
 
-        [Required(ErrorMessage = Password.requiredErrorMessage)]
+        [Required(ErrorMessage = PasswordVariable.requiredErrorMessage)]
         [DataType(DataType.Password)]
-        [StringLength(Password.maximumLength, MinimumLength = Password.minimumLength, ErrorMessage = Password.rangeErrorMessage)]
-        public string password { get; set; }
+        [StringLength(PasswordVariable.maximumLength, MinimumLength = PasswordVariable.minimumLength, ErrorMessage = PasswordVariable.rangeErrorMessage)]
+        public string Password { get; set; }
 
-        public string lsi { get; set; }
+        public string LSI { get; set; }
 
-        public string ip { get; set; }
+        public string IP { get; set; }
     }
 }

@@ -1,55 +1,51 @@
-using Dapper;
+using API.DatabaseModels;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
+using API.GlobalConnections.Variable;
 
 namespace Faucet4u.Annotations
 {
     public class IsCodeExpired : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
-                using (SqlConnection connection = new SqlConnection(Other.SQLConnectionString))
-                {
-                    string queryToExecute = "Select ConfirmationCodeExpiryTime from Users where Email = @UsernameOrEmail OR Username = @UsernameOrEmail";
-                    DynamicParameters parametersToAdd = new DynamicParameters();
-                    parametersToAdd.Add("UsernameOrEmail", valueAsString, DbType.String, ParameterDirection.Input);
-                    dynamic returnedResult = connection.QueryFirstOrDefault(queryToExecute, parametersToAdd);
-                    if (returnedResult != null)
-                    {
-                        int comparisonResult = DateTime.Compare(returnedResult.ConfirmationCodeExpiryTime, DateTime.Now);
-                        if (comparisonResult > 0)
-                        {
-                            return errorResult.Value;
-                        }
-                    }
+                DateTime ConfirmationCodeExpiryTime = (from User in DB.Queryable<Users>()
+                                                       where User.Email.Equals(ValueAsString) || User.Username.Equals(ValueAsString)
+                                                       select User.ConfirmationCodeExpiryTime).FirstOrDefault();
 
+                int ComparisonResult = DateTime.Compare(ConfirmationCodeExpiryTime, DateTime.Now);
+                if (ComparisonResult > 0)
+                {
+                    return ErrorResult.Value;
                 }
+
+
                 return ValidationResult.Success;
-
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.isCodeExpiredUnknownErrorMessage, valueAsString), ex.ToString());
-                return errorResult.Value;
-
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.isCodeExpiredUnknownErrorMessage, Value),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
             }
-
         }
     }
 }

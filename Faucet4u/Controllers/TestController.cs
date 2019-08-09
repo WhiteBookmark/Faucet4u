@@ -23,7 +23,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                Console.WriteLine(bodyValue.sessionId);
+                Console.WriteLine(bodyValue.SessionId);
                 Console.WriteLine(this.HttpContext.Request.Headers["sessionId"].ToString());
                 return Ok();
             }

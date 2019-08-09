@@ -1,51 +1,57 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Dapper;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Faucet4u.Annotations
 {
     public class IsEmailConfirmed : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
             try
             {
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
-                using (SqlConnection connection = new SqlConnection(Other.SQLConnectionString))
+                bool IsConfirmed = (from User in DB.Queryable<Users>()
+                                    where User.Email.Equals(ValueAsString)
+                                    select User.IsConfirmed).FirstOrDefault();
+
+                if (IsConfirmed)
                 {
-                    string queryToExecute = "Select IsConfirmed from Users where Email = @Email";
-                    DynamicParameters parametersToAdd = new DynamicParameters();
-                    parametersToAdd.Add("Email", valueAsString, DbType.String, ParameterDirection.Input);
-                    dynamic returnedResult = connection.QueryFirstOrDefault(queryToExecute, parametersToAdd);
-                    if (returnedResult != null)
-                    {
-                        if (returnedResult.IsConfirmed)
-                        {
-                            return ValidationResult.Success;
-                        }
-                    }
-                    Log.Hack(Guid.NewGuid(), String.Format(Logs.isEmaliConfirmedUseOfNonConfirmedEmailMessage, valueAsString));
-                    return errorResult.Value;
+                    return ValidationResult.Success;
                 }
+
+                Log.Hack(new Logs
+                {
+                    Message = String.Format(LogVariable.isEmaliConfirmedUseOfNonConfirmedEmailMessage, ValueAsString)
+                });
+                return ErrorResult.Value;
+
 
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.isEmailConfirmedUnknownErrorMessage, valueAsString), ex.ToString());
-                return errorResult.Value;
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.isEmailConfirmedUnknownErrorMessage, Value),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
 
             }
 

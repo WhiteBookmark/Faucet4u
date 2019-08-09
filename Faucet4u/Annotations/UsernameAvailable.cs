@@ -1,15 +1,16 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Dapper;
 using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
-using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Faucet4u.Annotations
 {
@@ -17,44 +18,50 @@ namespace Faucet4u.Annotations
     {
 
 
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
-            string valueAsString = Convert.ToString(value);
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
+            string ValueAsString = Convert.ToString(Value);
 
             try
             {
 
 
-                if (String.IsNullOrWhiteSpace(valueAsString))
+                if (String.IsNullOrWhiteSpace(ValueAsString))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
+                string Username = (from User in DB.Queryable<Users>()
+                                   where User.Username.Equals(ValueAsString)
+                                   select User.Username).FirstOrDefault();
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                if (!String.IsNullOrEmpty(Username))
                 {
-                    string queryToExecute = "Select Username from Users where Username = @Username";
-                    dynamic queryResult = connectionObject.QueryFirstOrDefault(queryToExecute, new { Username = valueAsString });
-                    if (queryResult != null)
+                    if (ValueAsString.Equals(Username, StringComparison.OrdinalIgnoreCase))
                     {
-                        string usernameFromQueryResult = queryResult.Username;
-                        if (valueAsString.Equals(usernameFromQueryResult, StringComparison.OrdinalIgnoreCase))
+                        Log.Hack(new Logs
                         {
-                            Log.Hack(Guid.NewGuid(), String.Format(Logs.usernameAvailableReuseUsernameMessage, valueAsString));
-                            return errorResult.Value;
-                        }
+                            Message = String.Format(LogVariable.usernameAvailableReuseUsernameMessage, ValueAsString)
+                        });
+                        return ErrorResult.Value;
                     }
-
                 }
+
+
 
                 return ValidationResult.Success;
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.usernameAvailableUnknownErrorMessage, valueAsString), ex.ToString());
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.usernameAvailableUnknownErrorMessage, ValueAsString),
+                    Exception = ex.ToString()
+                });
 
-                return errorResult.Value;
+                return ErrorResult.Value;
 
             }
 

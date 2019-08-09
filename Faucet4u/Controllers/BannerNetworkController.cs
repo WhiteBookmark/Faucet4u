@@ -1,17 +1,15 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
+using Dapper;
+using Faucet4u.GlobalConnections.Helper.User;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using MongoDB.Entities;
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
-using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
-using Faucet4u.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Faucet4u.Controllers
 {
@@ -19,51 +17,47 @@ namespace Faucet4u.Controllers
     [ApiController]
     public class BannerNetworkController : ControllerBase
     {
-        // GET: api/SessionValid
         [HttpGet]
-        public ActionResult Get()
+        public async Task<ActionResult> Get()
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                int CounterId = await DB.Queryable<Records>()
+                    .Where(Record => Record.RecordsID.Equals(KeysVariable.RecordsKey))
+                    .Select(Record => Record.StandardBannerNetworkCounter)
+                    .FirstOrDefaultAsync();
+                int MaxId = await GetMaxId.StandardNetworkAsync();
+                if (CounterId >= MaxId)
                 {
-                    //string queryToExecute = @"
-                    //                 BEGIN
-                    //                 DECLARE @CounterId int
-                    //                 SELECT @CounterId = Id FROM BannerNetworkCounter
-                    //                 DECLARE @MaxId int
-                    //                 SELECT @MaxId = max(Id) FROM BannerNetwork
-
-                    //                 IF(@CounterId IS NULL OR @CounterId = '')
-                    //                  BEGIN
-                    //                  INSERT INTO BannerNetworkCounter(Id) VALUES(0)
-                    //                  END
-                    //                    ELSE IF(@CounterId >= @MaxId)
-                    //                  BEGIN
-                    //                  UPDATE BannerNetworkCounter SET Id = 0
-                    //                  END
-
-                    //                    UPDATE BannerNetworkCounter SET Id = Id +1
-                    //                 SELECT HTMLCode FROM BannerNetwork WHERE Id = @CounterId                            
-                    //                END";
-
-                    string queryToExecute = @"
-                                     BEGIN
-                                     DECLARE @Id int
-                                     SELECT TOP 1 @Id = Id FROM BannerNetwork ORDER BY NEWID()	                                    
-                                     SELECT HTMLCode FROM BannerNetwork WHERE Id = @Id                            
-                                     END";
-
-                    dynamic result = connectionObject.QueryFirstOrDefault(queryToExecute);
-
-                    return Ok(result);
+                    await DB.Update<Records>()
+                        .Match(Record => Record.RecordsID.Equals(KeysVariable.RecordsKey))
+                        .Modify(Filter => Filter.Set(Record => Record.StandardBannerNetworkCounter, 1))
+                        .ExecuteAsync();
+                    CounterId = 1;
                 }
+                else
+                {
+                    await DB.Update<Records>()
+                        .Match(Record => Record.RecordsID.Equals(KeysVariable.RecordsKey))
+                        .Modify(Filter => Filter.Inc(Record => Record.StandardBannerNetworkCounter, 1))
+                        .ExecuteAsync();
+                }
+
+                var HTMLCode = await DB.Queryable<Settings>()
+                    .Where(Setting => Setting.SettingsID.Equals(KeysVariable.SettingsKey))
+                    .Select(Setting => Setting.BannerNetwork.Where(element => element.Id.Equals(CounterId))
+                    .Select(code => code.HTMLCode)
+                    .First())
+                    .FirstOrDefaultAsync();
+
+                Console.WriteLine(CounterId);
+                Console.WriteLine(HTMLCode);
+                return Ok(new { HTMLCode });
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
                 return BadRequest();
-
             }
         }
 
@@ -73,7 +67,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     //string queryToExecute = @"
                     //                 BEGIN
@@ -92,14 +86,14 @@ namespace Faucet4u.Controllers
                     //                  END
 
                     //                    UPDATE SquareBannerNetworkCounter SET Id = Id +1
-                    //                 SELECT HTMLCode FROM SquareBannerNetwork WHERE Id = @CounterId                            
+                    //                 SELECT HTMLCode FROM SquareBannerNetwork WHERE Id = @CounterId
                     //                END";
 
                     string queryToExecute = @"
                                      BEGIN
                                      DECLARE @Id int
-                                     SELECT TOP 1 @Id = Id FROM SquareBannerNetwork ORDER BY NEWID()	                                    
-                                     SELECT HTMLCode FROM SquareBannerNetwork WHERE Id = @Id                            
+                                     SELECT TOP 1 @Id = Id FROM SquareBannerNetwork ORDER BY NEWID()
+                                     SELECT HTMLCode FROM SquareBannerNetwork WHERE Id = @Id
                                      END";
 
                     dynamic result = connectionObject.QueryFirstOrDefault(queryToExecute);
@@ -111,7 +105,6 @@ namespace Faucet4u.Controllers
             {
                 Console.WriteLine(ex.ToString());
                 return BadRequest();
-
             }
         }
 
@@ -121,7 +114,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     //string queryToExecute = @"
                     //                 BEGIN
@@ -140,14 +133,14 @@ namespace Faucet4u.Controllers
                     //                  END
 
                     //                    UPDATE SkyscraperBannerNetworkCounter SET Id = Id +1
-                    //                 SELECT HTMLCode FROM SkyscraperBannerNetwork WHERE Id = @CounterId                            
+                    //                 SELECT HTMLCode FROM SkyscraperBannerNetwork WHERE Id = @CounterId
                     //                END";
 
                     string queryToExecute = @"
                                      BEGIN
                                      DECLARE @Id int
-                                     SELECT TOP 1 @Id = Id FROM SkyscraperBannerNetwork ORDER BY NEWID()	                                    
-                                     SELECT HTMLCode FROM SkyscraperBannerNetwork WHERE Id = @Id                            
+                                     SELECT TOP 1 @Id = Id FROM SkyscraperBannerNetwork ORDER BY NEWID()
+                                     SELECT HTMLCode FROM SkyscraperBannerNetwork WHERE Id = @Id
                                      END";
 
                     dynamic result = connectionObject.QueryFirstOrDefault(queryToExecute);
@@ -159,7 +152,6 @@ namespace Faucet4u.Controllers
             {
                 Console.WriteLine(ex.ToString());
                 return BadRequest();
-
             }
         }
     }

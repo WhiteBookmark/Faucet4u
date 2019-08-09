@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using MongoDB.Entities;
+using MongoDB.Driver.Linq;
+using System;
+using System.Linq;
 
 namespace Faucet4u
 {
@@ -20,6 +19,5 @@ namespace Faucet4u
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
-
     }
 }

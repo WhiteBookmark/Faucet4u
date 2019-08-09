@@ -1,5 +1,5 @@
 ﻿using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,12 +10,12 @@ namespace Faucet4u.Models
     public class SendEmailModel
     {
         [SendEmailKey]
-        public string key { get; set; }
+        public string Key { get; set; }
 
-        public string usernameOrEmailOrSessionId { get; set; }
+        public string UsernameOrEmailOrSessionId { get; set; }
 
-        public string subject { get; set; }
+        public string Subject { get; set; }
 
-        public string message { get; set; }
+        public string Message { get; set; }
     }
 }

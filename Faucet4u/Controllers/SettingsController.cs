@@ -12,14 +12,15 @@ using System.Threading.Tasks;
 using Dapper;
 using Faucet4u.GlobalConnections;
 using Faucet4u.GlobalConnections.Helper.User;
-using Faucet4u.GlobalConnections.Variable;
+using API.GlobalConnections.Variable;
 using Faucet4u.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
-using UserVariable = Faucet4u.GlobalConnections.Variable.UserVariable;
+using UserVariable = API.GlobalConnections.Variable.UserVariable;
+using API.DatabaseModels;
 
 namespace Faucet4u.Controllers
 {
@@ -38,27 +39,44 @@ namespace Faucet4u.Controllers
                 //    Log.Hack(Guid.NewGuid(), String.Format(Logs.countryDifferentMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
                 //    return BadRequest(new { message = UserVariable.countryDifferentMessage });
                 //}
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     //string queryToExecute = "Select FaucetHubBitcoinAddress, BitcoinAddress, PerfectMoneyAddress, PayeerAddress, AdvCashAddress, EthereumAddress, BitcoinCashAddress, DogecoinAddress, DashAddress, ZCashAddress, LitecoinAddress, EthereumClassicAddress, PeercoinAddress from Users where SessionId = @SessionId";
                     string queryToExecute = "Select FaucetHubBitcoinAddress from Users where SessionId = @SessionId";
                     DynamicParameters parametersToPass = new DynamicParameters();
-                    parametersToPass.Add("SessionId", new Guid(bodyValue.sessionId), DbType.Guid, ParameterDirection.Input);
+                    parametersToPass.Add("SessionId", new Guid(bodyValue.SessionId), DbType.Guid, ParameterDirection.Input);
                     dynamic queryResult = connectionObject.QueryFirstOrDefault(queryToExecute, parametersToPass);
                     if (queryToExecute != null)
                     {
-                        Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                        Log.Info(new Logs
+                        {
+                            Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                            IP = GetUserIPAddress.String(this.HttpContext),
+                        });
+
                         return Ok(JsonConvert.SerializeObject(queryResult));
                     }
                 }
                 Guid hackId = Guid.NewGuid();
-                Log.Hack(hackId, String.Format(Logs.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext));
+                Log.Hack(new Logs
+                {
+                    LogID = hackId,
+                    Message = String.Format(LogVariable.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, hackId.ToString()) } } });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }
@@ -74,17 +92,17 @@ namespace Faucet4u.Controllers
                 //    Log.Hack(Guid.NewGuid(), String.Format(Logs.countryDifferentMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: GetUserUsername.String(bodyValue.sessionId));
                 //    return BadRequest(new { message = UserVariable.countryDifferentMessage });
                 //}
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     //Check if someone else is having same faucethub address as that address is permanent for a faucethub user account
-                    if (CheatTest.IsFaucethubAddressExisting(bodyValue.sessionId, bodyValue.FaucetHubBitcoinAddress))
+                    if (await CheatTest.IsFaucethubAddressExisting(bodyValue.SessionId, bodyValue.FaucetHubBitcoinAddress))
                     {
                         string queryForCheatCounter = @"BEGIN
                                                         DECLARE @Username varchar(10)
                                                         SELECT @Username = Username FROM Users WHERE SessionId = @SessionId
                                                         EXEC InsertCheatHistory @UsernameInput = @Username, @Case = 2
                                                         END";
-                        connectionObject.Execute(queryForCheatCounter, new { SessionId = bodyValue.sessionId });
+                        connectionObject.Execute(queryForCheatCounter, new { SessionId = bodyValue.SessionId });
 
                     }
                     //string queryToExecute = "Update Users Set FaucetHubBitcoinAddress = @FaucetHubBitcoinAddress, BitcoinAddress = @BitcoinAddress, PerfectMoneyAddress = @PerfectMoneyAddress, PayeerAddress = @PayeerAddress, AdvCashAddress = @AdvCashAddress, EthereumAddress = @EthereumAddress, BitcoinCashAddress = @BitcoinCashAddress, DogecoinAddress = @DogecoinAddress, DashAddress =@DashAddress, ZCashAddress = @ZCashAddress, LitecoinAddress = @LitecoinAddress, EthereumClassicAddress = @EthereumClassicAddress, PeercoinAddress = @PeercoinAddress  where SessionId = @SessionId";
@@ -104,24 +122,41 @@ namespace Faucet4u.Controllers
                     //parametersToPass.Add("LitecoinAddress", bodyValue.LitecoinAddress, DbType.String, ParameterDirection.Input);
                     //parametersToPass.Add("EthereumClassicAddress", bodyValue.EthereumClassicAddress, DbType.String, ParameterDirection.Input);
                     //parametersToPass.Add("PeercoinAddress", bodyValue.PeercoinAddress, DbType.String, ParameterDirection.Input);
-                    parametersToPass.Add("SessionId", new Guid(bodyValue.sessionId), DbType.Guid, ParameterDirection.Input);
+                    parametersToPass.Add("SessionId", new Guid(bodyValue.SessionId), DbType.Guid, ParameterDirection.Input);
 
                     int queryResult = connectionObject.Execute(queryToExecute, parametersToPass);
 
                     if (Convert.ToBoolean(queryResult))
                     {
-                        Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: await GetUserUsername.String(bodyValue.sessionId));
+                        Log.Info(new Logs
+                        {
+                            Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                            IP = GetUserIPAddress.String(this.HttpContext),
+                        });
+
                         return Ok(new { message = UserVariable.settingsUpdationSuccessfulMessage });
                     }
                 }
                 Guid hackId = Guid.NewGuid();
-                Log.Hack(hackId, String.Format(Logs.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: await GetUserUsername.String(bodyValue.sessionId));
+                Log.Hack(new Logs
+                {
+                    LogID = hackId,
+                    Message = String.Format(LogVariable.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, hackId.ToString()) } } });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString(), Username: await GetUserUsername.String(bodyValue.sessionId));
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }
@@ -134,32 +169,49 @@ namespace Faucet4u.Controllers
             try
             {
 
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
 
-                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(bodyValue.password);
+                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(bodyValue.Password);
                     string queryToExecute = "Update Users Set Password = @Password  where SessionId = @SessionId AND SessionExpiry > getdate()";
 
                     DynamicParameters parametersToPass = new DynamicParameters();
                     parametersToPass.Add("Password", hashedPassword, DbType.String, ParameterDirection.Input);
-                    parametersToPass.Add("SessionId", new Guid(bodyValue.sessionId), DbType.Guid, ParameterDirection.Input);
+                    parametersToPass.Add("SessionId", new Guid(bodyValue.SessionId), DbType.Guid, ParameterDirection.Input);
 
-                    int queryResult = connectionObject.Execute(queryToExecute, parametersToPass);
+                    int queryResult = await connectionObject.ExecuteAsync(queryToExecute, parametersToPass);
 
                     if (Convert.ToBoolean(queryResult))
                     {
-                        Log.Info(Guid.NewGuid(), String.Format(Logs.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: await GetUserUsername.String(bodyValue.sessionId));
+                        Log.Info(new Logs
+                        {
+                            Message = String.Format(LogVariable.infoMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                            IP = GetUserIPAddress.String(this.HttpContext),
+                        });
+
                         return Ok(new { message = UserVariable.settingsUpdationSuccessfulMessage });
                     }
                 }
                 Guid hackId = Guid.NewGuid();
-                Log.Hack(hackId, String.Format(Logs.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), Username: await GetUserUsername.String(bodyValue.sessionId));
+                Log.Hack(new Logs
+                {
+                    LogID = hackId,
+                    Message = String.Format(LogVariable.hackAttemptMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext)
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, hackId.ToString()) } } });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString(), Username: await GetUserUsername.String(bodyValue.sessionId));
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value, JsonConvert.SerializeObject(bodyValue)),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }
@@ -172,7 +224,7 @@ namespace Faucet4u.Controllers
         {
             try
             {
-                using (SqlConnection connectionObject = new SqlConnection(Other.SQLConnectionString))
+                using (SqlConnection connectionObject = new SqlConnection(OtherVariable.SQLConnectionString))
                 {
                     IEnumerable<dynamic> result = await connectionObject.QueryAsync("SELECT * FROM Settings");
                     return Ok(JsonConvert.SerializeObject(result));
@@ -180,8 +232,15 @@ namespace Faucet4u.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Guid errorId = Guid.NewGuid();
-                Log.Error(errorId, String.Format(Logs.unknownErrorMessage, Request.Path.Value), IPinString: GetUserIPAddress.String(this.HttpContext), ExceptionMessage: ex.ToString());
+                Log.Error(new Logs
+                {
+                    LogID = errorId,
+                    Message = String.Format(LogVariable.unknownErrorMessage, Request.Path.Value),
+                    IP = GetUserIPAddress.String(this.HttpContext),
+                    Exception = ex.ToString()
+                });
                 return BadRequest(new { errors = new { message = new[] { String.Format(UserVariable.unknownErrorMessage, errorId.ToString()) } } });
 
             }

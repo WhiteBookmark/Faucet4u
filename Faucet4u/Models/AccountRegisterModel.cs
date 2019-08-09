@@ -1,12 +1,6 @@
+using API.GlobalConnections.Variable;
 using Faucet4u.Annotations;
-using Faucet4u.GlobalConnections;
-using Faucet4u.GlobalConnections.Variable;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Recaptchav2 = Faucet4u.Annotations.Recaptchav2;
-using Recaptchav2Variable = Faucet4u.GlobalConnections.Variable.Recaptchav2Variable;
-using Recaptchav3 = Faucet4u.Annotations.Recaptchav3;
-using Recaptchav3Variable = Faucet4u.GlobalConnections.Variable.Recaptchav3Variable;
 
 namespace Faucet4u.Models
 {
@@ -20,32 +14,31 @@ namespace Faucet4u.Models
         //[Recaptchav3(ErrorMessage = Recaptchav3Variable.invalidMessage)]
         //public string recaptchav3Response { get; set; }
 
-        [Required(ErrorMessage = Username.requiredErrorMessage)]
-        [StringLength(Username.maximumLength, MinimumLength = Username.minimumLength, ErrorMessage = Username.rangeErrorMessage)]
-        [RegularExpression(Username.regularExpression, ErrorMessage = Username.formatErrorMessage)]
-        [UsernameAvailable(ErrorMessage = Username.alreadyExistsMessage)]
-        public string username { get; set; }
+        [Required(ErrorMessage = UsernameVariable.requiredErrorMessage)]
+        [StringLength(UsernameVariable.maximumLength, MinimumLength = UsernameVariable.minimumLength, ErrorMessage = UsernameVariable.rangeErrorMessage)]
+        [RegularExpression(UsernameVariable.regularExpression, ErrorMessage = UsernameVariable.formatErrorMessage)]
+        [UsernameAvailable(ErrorMessage = UsernameVariable.alreadyExistsMessage)]
+        public string Username { get; set; }
 
-        [Required(ErrorMessage = Email.requiredErrorMessage)]
-        [DataType(DataType.EmailAddress, ErrorMessage = Email.formatErrorMessage)]
-        [StringLength(Email.maximumLength, MinimumLength = Email.minimumLength, ErrorMessage = Email.rangeErrorMessage)]
-        [EmailAvailable(ErrorMessage = Email.alreadyExistsMessage)]
-        public string email { get; set; }
+        [Required(ErrorMessage = EmailVariable.RequiredErrorMessage)]
+        [DataType(DataType.EmailAddress, ErrorMessage = EmailVariable.FormatErrorMessage)]
+        [StringLength(EmailVariable.MaximumLength, MinimumLength = EmailVariable.MinimumLength, ErrorMessage = EmailVariable.RangeErrorMessage)]
+        [EmailAvailable(ErrorMessage = EmailVariable.AlreadyExistsMessage)]
+        public string Email { get; set; }
 
-        [Required(ErrorMessage = Password.requiredErrorMessage)]
+        [Required(ErrorMessage = PasswordVariable.requiredErrorMessage)]
         [DataType(DataType.Password)]
-        [StringLength(Password.maximumLength, MinimumLength = Password.minimumLength, ErrorMessage = Password.rangeErrorMessage)]
-        public string password { get; set; }
+        [StringLength(PasswordVariable.maximumLength, MinimumLength = PasswordVariable.minimumLength, ErrorMessage = PasswordVariable.rangeErrorMessage)]
+        public string Password { get; set; }
 
-        [Required(ErrorMessage = Password.confirmRequiredErrorMessage)]
+        [Required(ErrorMessage = PasswordVariable.confirmRequiredErrorMessage)]
         [DataType(DataType.Password)]
-        [StringLength(Password.maximumLength, MinimumLength = Password.minimumLength, ErrorMessage = Password.rangeErrorMessage)]
-        [Compare("password", ErrorMessage = Password.confirmMismatchErrorMessage)]
-        public string confirmPassword { get; set; }
+        [StringLength(PasswordVariable.maximumLength, MinimumLength = PasswordVariable.minimumLength, ErrorMessage = PasswordVariable.rangeErrorMessage)]
+        [Compare("Password", ErrorMessage = PasswordVariable.confirmMismatchErrorMessage)]
+        public string ConfirmPassword { get; set; }
 
-        public string referrer { get; set; }
+        public string Referrer { get; set; }
 
-        public string ip { get; set; }
-
+        public string IP { get; set; }
     }
 }

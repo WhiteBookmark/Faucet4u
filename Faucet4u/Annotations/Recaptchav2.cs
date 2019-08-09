@@ -1,60 +1,57 @@
+using API.DatabaseModels;
+using API.GlobalConnections.Variable;
 using Faucet4u.GlobalConnections;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
-using AnnotationsVariable = Faucet4u.GlobalConnections.Variable.AnnotationsVariable;
-using Recaptchav2Variable = Faucet4u.GlobalConnections.Variable.Recaptchav2Variable;
 
 namespace Faucet4u.Annotations
 {
-
     public class Recaptchav2 : ValidationAttribute
     {
-
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult IsValid(object Value, ValidationContext ValidationContextSettings)
         {
-            Lazy<ValidationResult> errorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { validationContext.MemberName }));
+            Lazy<ValidationResult> ErrorResult = new Lazy<ValidationResult>(() => new ValidationResult(ErrorMessage, new String[] { ValidationContextSettings.MemberName }));
 
             try
             {
-                if (value == null || String.IsNullOrWhiteSpace(value.ToString()))
+                if (String.IsNullOrEmpty(Value.ToString()) || String.IsNullOrWhiteSpace(Value.ToString()))
                 {
-                    return errorResult.Value;
+                    return ErrorResult.Value;
                 }
 
-                String reCaptchav2Response = value.ToString();
-                String reCaptchav2Secret = Recaptchav2Variable.secretKey;
+                string Recaptchav2Response = Value.ToString();
+                string Recaptchav2Secret = Recaptchav2Variable.secretKey;
 
-
-                HttpClient httpClient = new HttpClient();
-                var httpResponse = httpClient.GetAsync($"{Recaptchav2Variable.verificationLink}?secret={reCaptchav2Secret}&response={reCaptchav2Response}").Result;
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                using (HttpClient HttpClient = new HttpClient())
                 {
-                    return errorResult.Value;
+                    HttpResponseMessage HttpResponse = HttpClient.GetAsync($"{Recaptchav2Variable.verificationLink}?secret={Recaptchav2Secret}&response={Recaptchav2Response}").Result;
+                    if (HttpResponse.StatusCode != HttpStatusCode.OK)
+                    {
+                        return ErrorResult.Value;
+                    }
+
+                    String JsonResponse = HttpResponse.Content.ReadAsStringAsync().Result;
+                    JObject JsonData = JObject.Parse(JsonResponse);
+                    if (JsonData["success"].ToString().Equals("false", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ErrorResult.Value;
+                    }
                 }
-
-                String jsonResponse = httpResponse.Content.ReadAsStringAsync().Result;
-                JObject jsonData = JObject.Parse(jsonResponse);
-                if (jsonData["success"].ToString().Equals("false", StringComparison.OrdinalIgnoreCase))
-                {
-                    return errorResult.Value;
-
-                }
-
                 return ValidationResult.Success;
             }
             catch (Exception ex)
             {
-                Log.Error(Guid.NewGuid(), String.Format(AnnotationsVariable.recaptchav2UnknownErrorMessage, value), ex.ToString());
-                return errorResult.Value;
+                Console.WriteLine(ex.ToString());
+                Log.Error(new Logs
+                {
+                    Message = String.Format(AnnotationsVariable.recaptchav2UnknownErrorMessage, Value),
+                    Exception = ex.ToString()
+                });
+                return ErrorResult.Value;
             }
-
         }
     }
 }
